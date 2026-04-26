@@ -20,14 +20,21 @@ class ContentFormPage extends ConsumerStatefulWidget {
 class _ContentFormPageState extends ConsumerState<ContentFormPage> {
   final _formKey = GlobalKey<FormState>();
   late final TextEditingController _titleCtrl;
+  // Se conserva el controlador de género para futura extensión del
+  // modelo, pero hoy no se persiste (no hay columna `genre` en la DB).
   late final TextEditingController _genreCtrl;
   late final TextEditingController _notesCtrl;
   late final TextEditingController _imageCtrl;
 
   ContentType _type = ContentType.movie;
   ContentStatus _status = ContentStatus.pending;
-  double _score = 0; // 0-10, displayed as 0-5 stars
+  double _score = 0; // 0-10, mostrado como 0-5 estrellas
   bool _loading = false;
+
+  // Cuando se edita un item existente, guardamos su addedAt original
+  // para no sobrescribirlo al guardar. Esta es una invariante del
+  // dominio (ver ContentItem.addedAt).
+  DateTime? _existingAddedAt;
 
   static const _types = [
     (type: ContentType.movie,  label: 'Movie',  icon: Icons.movie_outlined),
@@ -64,6 +71,7 @@ class _ContentFormPageState extends ConsumerState<ContentFormPage> {
         _type   = item.type;
         _status = item.status;
         _score  = item.score ?? 0;
+        _existingAddedAt = item.addedAt;
       });
     }
   }
@@ -81,20 +89,33 @@ class _ContentFormPageState extends ConsumerState<ContentFormPage> {
     if (!_formKey.currentState!.validate()) return;
     setState(() => _loading = true);
     final now = DateTime.now();
+    // En edición conservamos el addedAt original; en alta es ahora.
+    // El repositorio vuelve a forzar este invariante por si acaso.
+    final addedAt = _existingAddedAt ?? now;
+
     final item = ContentItem(
       id: widget.id,
-      title: _titleCtrl.text.trim(),
+      title: _titleCtrl.text,
       type: _type,
       status: _status,
       score: _score > 0 ? _score : null,
-      notes: _notesCtrl.text.trim().isEmpty ? null : _notesCtrl.text.trim(),
-      imageUrl: _imageCtrl.text.trim().isEmpty ? null : _imageCtrl.text.trim(),
-      addedAt: now,
+      notes: _notesCtrl.text,
+      imageUrl: _imageCtrl.text,
+      addedAt: addedAt,
       updatedAt: now,
     );
-    await ref.read(saveContentProvider).call(item);
-    ref.invalidate(contentListProvider);
-    if (mounted) context.pop();
+
+    try {
+      await ref.read(saveContentProvider).call(item);
+      ref.invalidate(contentListProvider);
+      if (mounted) context.pop();
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _loading = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('No se pudo guardar el contenido')),
+      );
+    }
   }
 
   @override
@@ -201,7 +222,20 @@ class _ContentFormPageState extends ConsumerState<ContentFormPage> {
             TextFormField(
               controller: _imageCtrl,
               style: AppTextStyles.bodyLg,
+              keyboardType: TextInputType.url,
               decoration: const InputDecoration(hintText: 'https://...'),
+              // Validamos en cliente como UX; el repositorio vuelve a
+              // sanear (defensa en profundidad).
+              validator: (v) {
+                if (v == null || v.trim().isEmpty) return null;
+                final uri = Uri.tryParse(v.trim());
+                if (uri == null ||
+                    (uri.scheme != 'http' && uri.scheme != 'https') ||
+                    !uri.hasAuthority) {
+                  return 'Solo se admiten URLs http/https';
+                }
+                return null;
+              },
             ),
 
             const SizedBox(height: 16),
