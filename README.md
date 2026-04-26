@@ -123,13 +123,9 @@ flutter run
 
 ---
 
-## 🤝 Contribuir
+## 🔒 Proyecto privado
 
-1. Fork del repo
-2. Crea tu rama: `git checkout -b feature/mi-mejora`
-3. Commit con mensaje claro: `git commit -m 'feat: añadir soporte para podcasts'`
-4. Push: `git push origin feature/mi-mejora`
-5. Abre un Pull Request contra `develop`
+Este es un proyecto personal, no está abierto a contribuciones externas.
 
 ---
 
