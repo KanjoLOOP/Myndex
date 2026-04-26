@@ -1,139 +1,221 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+
+import '../../../../core/constants/content_types.dart';
+import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_text_styles.dart';
+import '../../../../core/widgets/gradient_text.dart';
 import '../../../content/presentation/providers/content_providers.dart';
 import '../../../content/presentation/widgets/content_card.dart';
-import '../../../content/domain/entities/content_item.dart';
-import '../../../../core/constants/content_types.dart';
 
-class HomePage extends ConsumerWidget {
+class HomePage extends ConsumerStatefulWidget {
   const HomePage({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final asyncItems = ref.watch(contentListProvider);
+  ConsumerState<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends ConsumerState<HomePage> {
+  ContentType? _selectedType;
+
+  static const _typeFilters = [
+    (label: 'All',     type: null as ContentType?),
+    (label: 'Movies',  type: ContentType.movie),
+    (label: 'Series',  type: ContentType.series),
+    (label: 'Books',   type: ContentType.book),
+    (label: 'Games',   type: ContentType.game),
+    (label: 'Anime',   type: ContentType.anime),
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    // Aplicar filtro de tipo
     final filter = ref.watch(filterStateProvider);
+    final asyncItems = ref.watch(contentListProvider);
 
     return Scaffold(
+      backgroundColor: AppColors.bgPrimary,
       appBar: AppBar(
-        title: const Text('Myndex'),
+        backgroundColor: AppColors.bgPrimary,
+        titleSpacing: 20,
+        title: GradientText(
+          'Myndex',
+          style: AppTextStyles.headlineLg.copyWith(fontSize: 26),
+        ),
         actions: [
           IconButton(
-            icon: Badge(
-              isLabelVisible: filter.type != null || filter.status != null,
-              child: const Icon(Icons.filter_list),
+            icon: const Icon(Icons.search, color: AppColors.textSecondary),
+            onPressed: () => context.go('/explore'),
+          ),
+          const SizedBox(width: 8),
+        ],
+      ),
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // ── Filtros de tipo (scrollable chips) ──────────────────────────
+          SizedBox(
+            height: 44,
+            child: ListView.separated(
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              itemCount: _typeFilters.length,
+              separatorBuilder: (_, __) => const SizedBox(width: 8),
+              itemBuilder: (_, i) {
+                final f = _typeFilters[i];
+                final selected = _selectedType == f.type;
+                return _FilterChip(
+                  label: f.label,
+                  selected: selected,
+                  onTap: () {
+                    setState(() => _selectedType = f.type);
+                    ref.read(filterStateProvider.notifier).update(
+                          (s) => s.copyWith(
+                            type: f.type,
+                            clearType: f.type == null,
+                          ),
+                        );
+                  },
+                );
+              },
             ),
-            onPressed: () => _showFilterSheet(context, ref, filter),
+          ),
+          const SizedBox(height: 16),
+          // ── Lista de contenido ──────────────────────────────────────────
+          Expanded(
+            child: asyncItems.when(
+              loading: () => const Center(
+                child: CircularProgressIndicator(color: AppColors.cyan),
+              ),
+              error: (e, _) => Center(
+                child: Text('Error: $e', style: AppTextStyles.bodyMd),
+              ),
+              data: (items) => items.isEmpty
+                  ? _EmptyState(hasFilter: _selectedType != null)
+                  : GridView.builder(
+                      padding: const EdgeInsets.fromLTRB(16, 0, 16, 100),
+                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 2,
+                        childAspectRatio: 0.62,
+                        crossAxisSpacing: 12,
+                        mainAxisSpacing: 12,
+                      ),
+                      itemCount: items.length,
+                      itemBuilder: (_, i) => ContentCard(
+                        item: items[i],
+                        onTap: () => context.push('/content/${items[i].id}'),
+                      ),
+                    ),
+            ),
           ),
         ],
       ),
-      body: asyncItems.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('Error: $e')),
-        data: (items) => items.isEmpty
-            ? _EmptyState()
-            : ListView.builder(
-                padding: const EdgeInsets.all(12),
-                itemCount: items.length,
-                itemBuilder: (_, i) => ContentCard(
-                  item: items[i],
-                  onTap: () => context.push('/content/${items[i].id}'),
-                ),
-              ),
-      ),
-      floatingActionButton: FloatingActionButton.extended(
+      floatingActionButton: _GradientFAB(
         onPressed: () => context.push('/content/new'),
-        icon: const Icon(Icons.add),
-        label: const Text('Añadir'),
       ),
-    );
-  }
-
-  void _showFilterSheet(BuildContext context, WidgetRef ref, FilterState current) {
-    showModalBottomSheet(
-      context: context,
-      builder: (_) => _FilterSheet(current: current, ref: ref),
     );
   }
 }
 
+// ── Filter chip ────────────────────────────────────────────────────────────
+class _FilterChip extends StatelessWidget {
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+  const _FilterChip({required this.label, required this.selected, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    if (selected) {
+      return GestureDetector(
+        onTap: onTap,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          decoration: BoxDecoration(
+            gradient: AppColors.gradientH,
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: Text(label,
+              style: AppTextStyles.labelMd.copyWith(
+                  color: Colors.white, fontWeight: FontWeight.w600)),
+        ),
+      );
+    }
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        decoration: BoxDecoration(
+          color: AppColors.surface,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: AppColors.border),
+        ),
+        child: Text(label, style: AppTextStyles.labelMd),
+      ),
+    );
+  }
+}
+
+// ── FAB con gradiente ──────────────────────────────────────────────────────
+class _GradientFAB extends StatelessWidget {
+  final VoidCallback onPressed;
+  const _GradientFAB({required this.onPressed});
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onPressed,
+      child: Container(
+        width: 60, height: 60,
+        decoration: BoxDecoration(
+          gradient: AppColors.gradientH,
+          borderRadius: BorderRadius.circular(18),
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.blue.withOpacity(0.4),
+              blurRadius: 20,
+              offset: const Offset(0, 8),
+            ),
+          ],
+        ),
+        child: const Icon(Icons.add, color: Colors.white, size: 28),
+      ),
+    );
+  }
+}
+
+// ── Empty state ────────────────────────────────────────────────────────────
 class _EmptyState extends StatelessWidget {
+  final bool hasFilter;
+  const _EmptyState({this.hasFilter = false});
+
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(Icons.movie_outlined, size: 64,
-              color: Theme.of(context).colorScheme.outlineVariant),
-          const SizedBox(height: 16),
-          Text('Nada por aquí todavía',
-              style: Theme.of(context).textTheme.titleMedium),
-          const SizedBox(height: 8),
-          const Text('Añade tu primer contenido con el botón +'),
-        ],
-      ),
-    );
-  }
-}
-
-class _FilterSheet extends ConsumerWidget {
-  final FilterState current;
-  final WidgetRef ref;
-  const _FilterSheet({required this.current, required this.ref});
-
-  @override
-  Widget build(BuildContext context, WidgetRef _) {
-    return Padding(
-      padding: const EdgeInsets.all(24),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text('Filtros', style: Theme.of(context).textTheme.titleLarge),
-          const SizedBox(height: 16),
-          Text('Tipo', style: Theme.of(context).textTheme.labelLarge),
-          Wrap(
-            spacing: 8,
-            children: ContentType.values.map((t) {
-              final selected = current.type == t;
-              return FilterChip(
-                label: Text(t.label),
-                selected: selected,
-                onSelected: (v) {
-                  ref.read(filterStateProvider.notifier).update(
-                      (s) => s.copyWith(type: t, clearType: !v));
-                },
-              );
-            }).toList(),
+      child: Column(mainAxisSize: MainAxisSize.min, children: [
+        Container(
+          width: 80, height: 80,
+          decoration: BoxDecoration(
+            color: AppColors.surface,
+            borderRadius: BorderRadius.circular(20),
           ),
-          const SizedBox(height: 12),
-          Text('Estado', style: Theme.of(context).textTheme.labelLarge),
-          Wrap(
-            spacing: 8,
-            children: ContentStatus.values.map((s) {
-              final selected = current.status == s;
-              return FilterChip(
-                label: Text(s.label),
-                selected: selected,
-                onSelected: (v) {
-                  ref.read(filterStateProvider.notifier).update(
-                      (st) => st.copyWith(status: s, clearStatus: !v));
-                },
-              );
-            }).toList(),
-          ),
-          const SizedBox(height: 16),
-          TextButton.icon(
-            onPressed: () {
-              ref.read(filterStateProvider.notifier).state = const FilterState();
-              Navigator.pop(context);
-            },
-            icon: const Icon(Icons.clear_all),
-            label: const Text('Limpiar filtros'),
-          ),
-        ],
-      ),
+          child: const Icon(Icons.movie_filter_outlined, size: 40, color: AppColors.textDisabled),
+        ),
+        const SizedBox(height: 20),
+        Text(
+          hasFilter ? 'Sin resultados' : 'Tu biblioteca está vacía',
+          style: AppTextStyles.titleMd,
+        ),
+        const SizedBox(height: 8),
+        Text(
+          hasFilter
+              ? 'Prueba con otro filtro'
+              : 'Pulsa + para añadir tu primer contenido',
+          style: AppTextStyles.bodyMd,
+          textAlign: TextAlign.center,
+        ),
+      ]),
     );
   }
 }

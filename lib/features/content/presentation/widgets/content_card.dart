@@ -1,5 +1,9 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+
+import '../../../../core/constants/content_types.dart';
+import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_text_styles.dart';
 import '../../domain/entities/content_item.dart';
 
 class ContentCard extends StatelessWidget {
@@ -8,49 +12,79 @@ class ContentCard extends StatelessWidget {
 
   const ContentCard({super.key, required this.item, required this.onTap});
 
+  Color _statusColor(ContentStatus s) => switch (s) {
+        ContentStatus.pending    => AppColors.statusPending,
+        ContentStatus.inProgress => AppColors.statusInProgress,
+        ContentStatus.completed  => AppColors.statusCompleted,
+        ContentStatus.dropped    => AppColors.statusDropped,
+      };
+
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    return Card(
-      clipBehavior: Clip.antiAlias,
-      margin: const EdgeInsets.only(bottom: 10),
-      child: InkWell(
-        onTap: onTap,
-        child: Row(
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        decoration: BoxDecoration(
+          color: AppColors.bgSecondary,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: AppColors.border),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _Thumbnail(imageUrl: item.imageUrl),
-            const SizedBox(width: 12),
+            // ── Portada ────────────────────────────────────────────────
             Expanded(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 4),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(item.title,
-                        style: Theme.of(context).textTheme.titleSmall,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis),
-                    const SizedBox(height: 4),
-                    Row(children: [
-                      _TypeChip(item.type.label),
-                      const SizedBox(width: 8),
-                      _StatusDot(item.status.label, colorScheme),
-                    ]),
-                    if (item.score != null) ...[
-                      const SizedBox(height: 4),
-                      Row(children: [
-                        Icon(Icons.star_rounded, size: 14, color: colorScheme.primary),
-                        const SizedBox(width: 2),
-                        Text('${item.score}',
-                            style: Theme.of(context).textTheme.bodySmall),
-                      ]),
-                    ],
-                  ],
-                ),
+              child: ClipRRect(
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+                child: item.imageUrl != null && item.imageUrl!.isNotEmpty
+                    ? CachedNetworkImage(
+                        imageUrl: item.imageUrl!,
+                        fit: BoxFit.cover,
+                        width: double.infinity,
+                        placeholder: (_, __) => _Placeholder(item.type),
+                        errorWidget: (_, __, ___) => _Placeholder(item.type),
+                      )
+                    : _Placeholder(item.type),
               ),
             ),
-            const Icon(Icons.chevron_right),
-            const SizedBox(width: 8),
+            // ── Metadata ───────────────────────────────────────────────
+            Padding(
+              padding: const EdgeInsets.fromLTRB(10, 8, 10, 10),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    item.title,
+                    style: AppTextStyles.titleMd.copyWith(fontSize: 13),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 6),
+                  Row(children: [
+                    // Status dot + label
+                    Container(
+                      width: 6, height: 6,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: _statusColor(item.status),
+                      ),
+                    ),
+                    const SizedBox(width: 5),
+                    Text(item.status.label,
+                        style: AppTextStyles.labelSm
+                            .copyWith(color: _statusColor(item.status))),
+                  ]),
+                  if (item.score != null) ...[
+                    const SizedBox(height: 4),
+                    Row(children: [
+                      const Icon(Icons.star_rounded, size: 12, color: AppColors.cyan),
+                      const SizedBox(width: 3),
+                      Text('${item.score}', style: AppTextStyles.labelSm.copyWith(color: AppColors.cyan)),
+                    ]),
+                  ],
+                ],
+              ),
+            ),
           ],
         ),
       ),
@@ -58,65 +92,27 @@ class ContentCard extends StatelessWidget {
   }
 }
 
-class _Thumbnail extends StatelessWidget {
-  final String? imageUrl;
-  const _Thumbnail({this.imageUrl});
+class _Placeholder extends StatelessWidget {
+  final ContentType type;
+  const _Placeholder(this.type);
 
-  @override
-  Widget build(BuildContext context) {
-    if (imageUrl == null || imageUrl!.isEmpty) {
-      return Container(
-        width: 60, height: 80,
-        color: Theme.of(context).colorScheme.surfaceContainerHighest,
-        child: const Icon(Icons.image_not_supported_outlined),
-      );
-    }
-    return CachedNetworkImage(
-      imageUrl: imageUrl!,
-      width: 60,
-      height: 80,
-      fit: BoxFit.cover,
-      placeholder: (_, __) => const SizedBox(
-          width: 60, height: 80,
-          child: Center(child: CircularProgressIndicator(strokeWidth: 2))),
-      errorWidget: (_, __, ___) => const Icon(Icons.broken_image_outlined),
-    );
-  }
-}
-
-class _TypeChip extends StatelessWidget {
-  final String label;
-  const _TypeChip(this.label);
+  IconData get icon => switch (type) {
+        ContentType.movie   => Icons.movie_outlined,
+        ContentType.series  => Icons.tv_outlined,
+        ContentType.book    => Icons.menu_book_outlined,
+        ContentType.game    => Icons.sports_esports_outlined,
+        ContentType.anime   => Icons.animation_outlined,
+        ContentType.podcast => Icons.podcasts_outlined,
+        ContentType.other   => Icons.category_outlined,
+      };
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.secondaryContainer,
-        borderRadius: BorderRadius.circular(4),
+      color: AppColors.surface,
+      child: Center(
+        child: Icon(icon, size: 40, color: AppColors.textDisabled),
       ),
-      child: Text(label,
-          style: Theme.of(context).textTheme.labelSmall?.copyWith(
-              color: Theme.of(context).colorScheme.onSecondaryContainer)),
     );
-  }
-}
-
-class _StatusDot extends StatelessWidget {
-  final String label;
-  final ColorScheme colorScheme;
-  const _StatusDot(this.label, this.colorScheme);
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(children: [
-      Container(
-          width: 6, height: 6,
-          decoration: BoxDecoration(
-              shape: BoxShape.circle, color: colorScheme.primary)),
-      const SizedBox(width: 4),
-      Text(label, style: Theme.of(context).textTheme.labelSmall),
-    ]);
   }
 }
