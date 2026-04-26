@@ -1,17 +1,21 @@
-import 'dart:convert';
-import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 
+import '../../../../core/security/safe_error_message.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/widgets/gradient_text.dart';
-import '../../../../core/utils/json_utils.dart';
+import '../../../backup/presentation/providers/backup_providers.dart';
 import '../../../content/presentation/providers/content_providers.dart';
 
+/// Pantalla de Ajustes.
+///
+/// Aquí viven las acciones globales: export/import del backup JSON,
+/// preferencias de apariencia y enlaces informativos. Toda la lógica
+/// real de backup vive en [BackupService]; esta página es solo glue.
 class SettingsPage extends ConsumerWidget {
   const SettingsPage({super.key});
 
@@ -23,18 +27,11 @@ class SettingsPage extends ConsumerWidget {
         backgroundColor: AppColors.bgPrimary,
         titleSpacing: 20,
         title: const Text('Settings', style: AppTextStyles.titleLg),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.search, color: AppColors.textSecondary),
-            onPressed: () {},
-          ),
-          const SizedBox(width: 8),
-        ],
       ),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 40),
         children: [
-          // ── Data Management ────────────────────────────────────────
+          // ── Gestión de datos ──────────────────────────────────────
           _SectionHeader('Data Management'),
           const SizedBox(height: 10),
           _SettingsGroup(children: [
@@ -54,7 +51,7 @@ class SettingsPage extends ConsumerWidget {
           ]),
 
           const SizedBox(height: 24),
-          // ── Appearance ─────────────────────────────────────────────
+          // ── Apariencia ────────────────────────────────────────────
           _SectionHeader('Appearance'),
           const SizedBox(height: 10),
           _SettingsGroup(children: [
@@ -83,13 +80,14 @@ class SettingsPage extends ConsumerWidget {
                       style: AppTextStyles.bodyMd),
                 ),
                 const SizedBox(width: 6),
-                const Icon(Icons.chevron_right, color: AppColors.textDisabled, size: 18),
+                const Icon(Icons.chevron_right,
+                    color: AppColors.textDisabled, size: 18),
               ]),
             ),
           ]),
 
           const SizedBox(height: 24),
-          // ── General ────────────────────────────────────────────────
+          // ── General ───────────────────────────────────────────────
           _SectionHeader('General'),
           const SizedBox(height: 10),
           _SettingsGroup(children: [
@@ -120,42 +118,57 @@ class SettingsPage extends ConsumerWidget {
     );
   }
 
+  // ─── Acciones ───────────────────────────────────────────────────
+
+  /// Genera el backup, lo escribe en el directorio privado de la app
+  /// y abre el sheet de compartir para que el usuario lo guarde
+  /// donde quiera (Drive, email, almacenamiento local…).
   Future<void> _export(BuildContext context, WidgetRef ref) async {
     try {
-      final repo = ref.read(contentRepositoryProvider);
-      final data = await repo.exportAll();
-      final json = JsonUtils.encode({'version': 1, 'items': data});
+      final service = ref.read(backupServiceProvider);
       final dir = await getApplicationDocumentsDirectory();
-      final file = File('${dir.path}/myndex_backup.json');
-      await file.writeAsString(json);
+      final path = await service.exportToFile(dir);
+      if (!context.mounted) return;
       await SharePlus.instance.share(
-        ShareParams(files: [XFile(file.path)], text: 'Myndex backup'),
+        ShareParams(files: [XFile(path)], text: 'Myndex backup'),
       );
     } catch (e) {
-      if (context.mounted) _showSnack(context, 'Error al exportar: $e', error: true);
+      if (!context.mounted) return;
+      _showSnack(context, SafeErrorMessage.forUser(e), error: true);
     }
   }
 
+  /// Permite al usuario elegir un fichero JSON y lo importa.
+  /// Por defecto se omiten duplicados (mismo título + tipo).
   Future<void> _import(BuildContext context, WidgetRef ref) async {
     try {
-      final result = await FilePicker.platform
-          .pickFiles(type: FileType.custom, allowedExtensions: ['json']);
-      if (result?.files.single.path == null) return;
-      final raw = await File(result!.files.single.path!).readAsString();
-      final decoded = jsonDecode(raw) as Map<String, dynamic>;
-      final items = (decoded['items'] as List).cast<Map<String, dynamic>>();
-      final count = await ref.read(contentRepositoryProvider).importAll(items);
+      final result = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: const ['json'],
+        // No retenemos el dato fuera de uso, el picker libera el tmp.
+        withData: false,
+      );
+      final path = result?.files.single.path;
+      if (path == null) return;
+
+      final service = ref.read(backupServiceProvider);
+      final count = await service.importFromFile(path);
       ref.invalidate(contentListProvider);
-      if (context.mounted) _showSnack(context, '$count elementos importados');
+      if (!context.mounted) return;
+      _showSnack(context, '$count elementos importados');
     } catch (e) {
-      if (context.mounted) _showSnack(context, 'Error al importar: $e', error: true);
+      if (!context.mounted) return;
+      _showSnack(context, SafeErrorMessage.forUser(e), error: true);
     }
   }
+
+  // ─── Utilidades de UI ───────────────────────────────────────────
 
   void _showSnack(BuildContext context, String msg, {bool error = false}) {
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
       content: Text(msg),
-      backgroundColor: error ? const Color(0xFFFF6B6B) : AppColors.blue,
+      backgroundColor:
+          error ? const Color(0xFFFF6B6B) : AppColors.blue,
       behavior: SnackBarBehavior.floating,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
     ));
@@ -169,7 +182,8 @@ class SettingsPage extends ConsumerWidget {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         title: GradientText('Myndex', style: AppTextStyles.headlineMd),
         content: Text(
-          'Tu biblioteca personal de contenido.\nFilms, series, juegos, libros — todo en un sitio.',
+          'Tu biblioteca personal de contenido.\n'
+          'Films, series, juegos, libros — todo en un sitio.',
           style: AppTextStyles.bodyMd,
         ),
         actions: [
@@ -183,15 +197,14 @@ class SettingsPage extends ConsumerWidget {
   }
 }
 
-// ── Sub-widgets ────────────────────────────────────────────────────────────
+// ─── Sub-widgets ──────────────────────────────────────────────────
 
 class _SectionHeader extends StatelessWidget {
   final String title;
   const _SectionHeader(this.title);
   @override
-  Widget build(BuildContext context) {
-    return GradientText(title, style: AppTextStyles.titleMd);
-  }
+  Widget build(BuildContext context) =>
+      GradientText(title, style: AppTextStyles.titleMd);
 }
 
 class _SettingsGroup extends StatelessWidget {
@@ -230,7 +243,8 @@ class _SettingsTile extends StatelessWidget {
     return ListTile(
       onTap: onTap,
       leading: Container(
-        width: 36, height: 36,
+        width: 36,
+        height: 36,
         decoration: BoxDecoration(
           color: iconColor.withOpacity(0.12),
           borderRadius: BorderRadius.circular(10),
