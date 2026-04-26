@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Zentory - Library</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Work+Sans:wght@500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "primary-container": "#283593",
+                    "surface-container-low": "#1c1b1b",
+                    "surface-dim": "#131313",
+                    "surface": "#131313",
+                    "primary": "#bcc2ff",
+                    "secondary": "#a2d3a4",
+                    "on-primary-fixed-variant": "#303c9a",
+                    "background": "#131313",
+                    "on-primary-fixed": "#000c62",
+                    "secondary-fixed-dim": "#a2d3a4",
+                    "on-background": "#e5e2e1",
+                    "on-primary-container": "#9aa5ff",
+                    "tertiary-fixed": "#ffdbd0",
+                    "on-tertiary-fixed-variant": "#713623",
+                    "surface-bright": "#393939",
+                    "on-error-container": "#ffdad6",
+                    "on-secondary-fixed-variant": "#24502c",
+                    "tertiary-container": "#682f1d",
+                    "surface-container": "#201f1f",
+                    "primary-fixed-dim": "#bcc2ff",
+                    "on-surface-variant": "#c6c5d4",
+                    "tertiary": "#ffb59e",
+                    "tertiary-fixed-dim": "#ffb59e",
+                    "on-tertiary": "#54200f",
+                    "error": "#ffb4ab",
+                    "outline": "#908f9d",
+                    "on-secondary-fixed": "#002109",
+                    "on-tertiary-fixed": "#390c01",
+                    "surface-tint": "#bcc2ff",
+                    "on-tertiary-container": "#e8977e",
+                    "error-container": "#93000a",
+                    "on-secondary-container": "#91c193",
+                    "surface-container-highest": "#353534",
+                    "secondary-fixed": "#bdefbe",
+                    "on-secondary": "#0a3817",
+                    "inverse-primary": "#4955b3",
+                    "on-primary": "#152383",
+                    "surface-variant": "#353534",
+                    "surface-container-high": "#2a2a2a",
+                    "inverse-surface": "#e5e2e1",
+                    "outline-variant": "#454652",
+                    "on-surface": "#e5e2e1",
+                    "on-error": "#690005",
+                    "surface-container-lowest": "#0e0e0e",
+                    "primary-fixed": "#dfe0ff",
+                    "secondary-container": "#24502c",
+                    "inverse-on-surface": "#313030"
+            },
+            "borderRadius": {
+                    "DEFAULT": "1rem",
+                    "lg": "2rem",
+                    "xl": "3rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "base": "8px",
+                    "gutter": "16px",
+                    "margin-desktop": "24px",
+                    "margin-mobile": "16px",
+                    "container-padding": "28px"
+            },
+            "fontFamily": {
+                    "body-lg": [
+                            "Inter"
+                    ],
+                    "label-md": [
+                            "Work Sans"
+                    ],
+                    "title-lg": [
+                            "Inter"
+                    ],
+                    "display-lg": [
+                            "Inter"
+                    ],
+                    "headline-lg": [
+                            "Inter"
+                    ]
+            },
+            "fontSize": {
+                    "body-lg": [
+                            "16px",
+                            {
+                                    "lineHeight": "24px",
+                                    "letterSpacing": "0.5px",
+                                    "fontWeight": "400"
+                            }
+                    ],
+                    "label-md": [
+                            "12px",
+                            {
+                                    "lineHeight": "16px",
+                                    "letterSpacing": "0.5px",
+                                    "fontWeight": "500"
+                            }
+                    ],
+                    "title-lg": [
+                            "22px",
+                            {
+                                    "lineHeight": "28px",
+                                    "fontWeight": "500"
+                            }
+                    ],
+                    "display-lg": [
+                            "57px",
+                            {
+                                    "lineHeight": "64px",
+                                    "letterSpacing": "-0.25px",
+                                    "fontWeight": "700"
+                            }
+                    ],
+                    "headline-lg": [
+                            "32px",
+                            {
+                                    "lineHeight": "40px",
+                                    "fontWeight": "600"
+                            }
+                    ]
+            }
+    },
+        },
+      }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background font-body-lg min-h-screen pb-24">
+<!-- TopAppBar -->
+<header class="bg-slate-950 font-sans tracking-tight text-lg docked full-width top-0 bg-slate-900 flat no shadows flex justify-between items-center w-full px-6 py-4 sticky z-40">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-indigo-400">menu</span>
+<span class="text-2xl font-medium tracking-widest text-slate-100">Zentory</span>
+</div>
+<div>
+<span class="material-symbols-outlined text-indigo-400">search</span>
+</div>
+</header>
+<!-- Main Content -->
+<main class="px-margin-mobile md:px-margin-desktop py-gutter max-w-7xl mx-auto">
+<!-- Filter Chips -->
+<div class="flex overflow-x-auto gap-3 pb-4 no-scrollbar mb-6">
+<button class="flex items-center justify-center bg-secondary/20 text-secondary border border-secondary/30 rounded-full px-4 py-2 font-label-md text-label-md whitespace-nowrap">All</button>
+<button class="flex items-center justify-center bg-surface-container-high text-on-surface-variant border border-outline-variant/30 rounded-full px-4 py-2 font-label-md text-label-md whitespace-nowrap">Movies</button>
+<button class="flex items-center justify-center bg-surface-container-high text-on-surface-variant border border-outline-variant/30 rounded-full px-4 py-2 font-label-md text-label-md whitespace-nowrap">Books</button>
+<button class="flex items-center justify-center bg-surface-container-high text-on-surface-variant border border-outline-variant/30 rounded-full px-4 py-2 font-label-md text-label-md whitespace-nowrap">Games</button>
+<button class="flex items-center justify-center bg-surface-container-high text-on-surface-variant border border-outline-variant/30 rounded-full px-4 py-2 font-label-md text-label-md whitespace-nowrap">Series</button>
+</div>
+<!-- Content Grid -->
+<div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-gutter md:gap-margin-desktop">
+<!-- Card 1 -->
+<div class="flex flex-col gap-3 group">
+<div class="relative w-full aspect-[2/3] rounded-DEFAULT overflow-hidden bg-surface-container">
+<img alt="Dune book cover" class="w-full h-full object-cover" data-alt="Minimalist abstract representation of a desert planet with twin moons in warm orange and dark brown tones" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCZgvtfNEbZdbfehHNa4S5jkc_u-NrAtCrx372_-RB7TzZX4pf9K76uV4fLOrvmIwlipOEOAjq_maCkRiezVZUUgjqOTnGChx7BNoEfPVnJqEQegt6NP8af_Vm9e7OR_zTbh60IjQjnww0o-xVR2Oh8XFBcyX5_PaLc-_9plNPp8YADRklJpVJDWOGrGO3frKJqQrbapxx7GpneMwr1T9MsAWPAvLqAmalefbDnVwHQiOxfTARRlY8x4iOGfCPCXpIMHvmxP_CKzRU8"/>
+<div class="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+</div>
+<div>
+<h3 class="font-title-lg text-title-lg text-on-surface line-clamp-1 mb-1">Dune</h3>
+<div class="inline-flex items-center bg-secondary/10 text-secondary rounded-full px-2 py-0.5 font-label-md text-[10px]">
+                        Completed
+                    </div>
+</div>
+</div>
+<!-- Card 2 -->
+<div class="flex flex-col gap-3 group">
+<div class="relative w-full aspect-[2/3] rounded-DEFAULT overflow-hidden bg-surface-container">
+<img alt="Blade Runner movie poster" class="w-full h-full object-cover" data-alt="Cinematic neon lit rainy city street at night in cyberpunk aesthetic with dark blue and magenta hues" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCnv7doIf6KuuSFnsf4__zlMGNVSLUlMa5IA6F4YMfO8mtwlauSYsW3CPRmrvtdnH1vLFagU6Spvjz57EEAuBx_EBebeiz781ebXcudysBNm9PKdJxnk95DElOxZgb_5nO4AnFA_QVJIfnkBu2F4-_OSrY_wXDLaZkASpuQQo7CbOpVSxLVRaVCk5hxC8Wu-AYDuu0LEDIIcpcjzuCkxnGk9Sdo4zHHck9YrzMw9TiuC-cyt-PEfBalIgFQLq9ctqkJoPn8c8BkZ0dA"/>
+<div class="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+</div>
+<div>
+<h3 class="font-title-lg text-title-lg text-on-surface line-clamp-1 mb-1">Blade Runner 2049</h3>
+<div class="inline-flex items-center bg-primary/10 text-primary rounded-full px-2 py-0.5 font-label-md text-[10px]">
+                        In Progress
+                    </div>
+</div>
+</div>
+<!-- Card 3 -->
+<div class="flex flex-col gap-3 group">
+<div class="relative w-full aspect-[2/3] rounded-DEFAULT overflow-hidden bg-surface-container">
+<img alt="Game cover" class="w-full h-full object-cover" data-alt="Dark fantasy landscape with glowing magical elements and ancient ruins in deep forest greens and mystical blues" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDGFtwhTK78MMXTgeWMVQK7mmsdJoBTO3CO6NuclCn8KyWEe0OP0qfLs1T1U_6zQSI46KhA_umMp9tkWv2Iec2Z3PXMP_DynrrdG5qakWJK4Gt8M4lPXPLaoNKJJcQCR7phdGKT59AaK8v1VbrbsPLEpo3x2fizZUWfpFTKb3tOZ_JVIYp9MqAnFRe16Qfj7NzFQ9339zJdwTw_BtPZLik1vRScOvc-fK7gJviMxgT7ca9nwmk-YA2em_HUVkdb4zTuGOjIwA7djdJW"/>
+<div class="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+</div>
+<div>
+<h3 class="font-title-lg text-title-lg text-on-surface line-clamp-1 mb-1">Elden Ring</h3>
+<div class="inline-flex items-center bg-secondary/10 text-secondary rounded-full px-2 py-0.5 font-label-md text-[10px]">
+                        Completed
+                    </div>
+</div>
+</div>
+<!-- Card 4 -->
+<div class="flex flex-col gap-3 group">
+<div class="relative w-full aspect-[2/3] rounded-DEFAULT overflow-hidden bg-surface-container">
+<img alt="Book cover" class="w-full h-full object-cover" data-alt="Vintage hardcover book sitting alone on a dark mahogany desk with dramatic spotlight illumination" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAQ3WVqkxrgxto3AcbXQpPxeQoipvJaVULR7ikMCaroE4bNyF-jFyj83HQmFt2ziqf6K9lOetgVuUZ7F_D7-r6F-zV_TswP6I_XsyTKuMja0vs1ndjLtTbIxStLHUmYjvItGFTvJl6sk4sAv3xCOTAkqTRMJf6Tw8vCZC0hnoKB76wdqpuLVPWcv_kGi-C5-NtlGpSfcPTSf1tNOBo7D1ItNMfCjmcFyL-jYkBUuYcB34XCahahhPeA5iGGOiswkiGdXSCtgX5_1emU"/>
+<div class="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+</div>
+<div>
+<h3 class="font-title-lg text-title-lg text-on-surface line-clamp-1 mb-1">Meditations</h3>
+<div class="inline-flex items-center bg-primary/10 text-primary rounded-full px-2 py-0.5 font-label-md text-[10px]">
+                        In Progress
+                    </div>
+</div>
+</div>
+</div>
+</main>
+<!-- FAB -->
+<button class="fixed right-6 bottom-[100px] w-14 h-14 bg-secondary text-on-secondary rounded-[20px] shadow-[0_4px_12px_rgba(162,211,164,0.2)] flex items-center justify-center z-50 hover:bg-secondary-fixed transition-colors">
+<span class="material-symbols-outlined text-[28px]">add</span>
+</button>
+<!-- BottomNavBar -->
+<nav class="bg-slate-900 text-[11px] font-medium uppercase tracking-tighter docked full-width bottom-0 rounded-t-[28px] border-t border-slate-800/50 shadow-[0_-4px_20px_0_rgba(0,0,0,0.3)] fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 pt-3 pb-6 md:hidden">
+<div class="flex flex-col items-center justify-center bg-emerald-400/20 text-emerald-400 rounded-full px-5 py-1">
+<span class="material-symbols-outlined mb-1" style="font-variation-settings: 'FILL' 1;">library_books</span>
+<span>Library</span>
+</div>
+<div class="flex flex-col items-center justify-center text-slate-500 px-5 py-1 hover:text-indigo-300">
+<span class="material-symbols-outlined mb-1">explore</span>
+<span>Explore</span>
+</div>
+<div class="flex flex-col items-center justify-center text-slate-500 px-5 py-1 hover:text-indigo-300">
+<span class="material-symbols-outlined mb-1">archive</span>
+<span>Vault</span>
+</div>
+<div class="flex flex-col items-center justify-center text-slate-500 px-5 py-1 hover:text-indigo-300">
+<span class="material-symbols-outlined mb-1">settings</span>
+<span>Settings</span>
+</div>
+</nav>
+</body></html>

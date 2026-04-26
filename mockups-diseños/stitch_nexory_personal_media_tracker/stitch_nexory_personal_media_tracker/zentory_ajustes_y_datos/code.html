@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Zentory - Settings</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Work+Sans:wght@500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                            "primary-container": "#283593",
+                            "surface-container-low": "#1c1b1b",
+                            "surface-dim": "#131313",
+                            "surface": "#131313",
+                            "primary": "#bcc2ff",
+                            "secondary": "#a2d3a4",
+                            "on-primary-fixed-variant": "#303c9a",
+                            "background": "#131313",
+                            "on-primary-fixed": "#000c62",
+                            "secondary-fixed-dim": "#a2d3a4",
+                            "on-background": "#e5e2e1",
+                            "on-primary-container": "#9aa5ff",
+                            "tertiary-fixed": "#ffdbd0",
+                            "on-tertiary-fixed-variant": "#713623",
+                            "surface-bright": "#393939",
+                            "on-error-container": "#ffdad6",
+                            "on-secondary-fixed-variant": "#24502c",
+                            "tertiary-container": "#682f1d",
+                            "surface-container": "#201f1f",
+                            "primary-fixed-dim": "#bcc2ff",
+                            "on-surface-variant": "#c6c5d4",
+                            "tertiary": "#ffb59e",
+                            "tertiary-fixed-dim": "#ffb59e",
+                            "on-tertiary": "#54200f",
+                            "error": "#ffb4ab",
+                            "outline": "#908f9d",
+                            "on-secondary-fixed": "#002109",
+                            "on-tertiary-fixed": "#390c01",
+                            "surface-tint": "#bcc2ff",
+                            "on-tertiary-container": "#e8977e",
+                            "error-container": "#93000a",
+                            "on-secondary-container": "#91c193",
+                            "surface-container-highest": "#353534",
+                            "secondary-fixed": "#bdefbe",
+                            "on-secondary": "#0a3817",
+                            "inverse-primary": "#4955b3",
+                            "on-primary": "#152383",
+                            "surface-variant": "#353534",
+                            "surface-container-high": "#2a2a2a",
+                            "inverse-surface": "#e5e2e1",
+                            "outline-variant": "#454652",
+                            "on-surface": "#e5e2e1",
+                            "on-error": "#690005",
+                            "surface-container-lowest": "#0e0e0e",
+                            "primary-fixed": "#dfe0ff",
+                            "secondary-container": "#24502c",
+                            "inverse-on-surface": "#313030"
+                    },
+                    "borderRadius": {
+                            "DEFAULT": "1rem",
+                            "lg": "2rem",
+                            "xl": "3rem",
+                            "full": "9999px"
+                    },
+                    "spacing": {
+                            "base": "8px",
+                            "gutter": "16px",
+                            "margin-desktop": "24px",
+                            "margin-mobile": "16px",
+                            "container-padding": "28px"
+                    },
+                    "fontFamily": {
+                            "body-lg": [
+                                    "Inter"
+                            ],
+                            "label-md": [
+                                    "workSans"
+                            ],
+                            "title-lg": [
+                                    "Inter"
+                            ],
+                            "display-lg": [
+                                    "Inter"
+                            ],
+                            "headline-lg": [
+                                    "Inter"
+                            ]
+                    },
+                    "fontSize": {
+                            "body-lg": [
+                                    "16px",
+                                    {
+                                            "lineHeight": "24px",
+                                            "letterSpacing": "0.5px",
+                                            "fontWeight": "400"
+                                    }
+                            ],
+                            "label-md": [
+                                    "12px",
+                                    {
+                                            "lineHeight": "16px",
+                                            "letterSpacing": "0.5px",
+                                            "fontWeight": "500"
+                                    }
+                            ],
+                            "title-lg": [
+                                    "22px",
+                                    {
+                                            "lineHeight": "28px",
+                                            "fontWeight": "500"
+                                    }
+                            ],
+                            "display-lg": [
+                                    "57px",
+                                    {
+                                            "lineHeight": "64px",
+                                            "letterSpacing": "-0.25px",
+                                            "fontWeight": "700"
+                                    }
+                            ],
+                            "headline-lg": [
+                                    "32px",
+                                    {
+                                            "lineHeight": "40px",
+                                            "fontWeight": "600"
+                                    }
+                            ]
+                    }
+            },
+                },
+            }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        /* Hide scrollbar for cleaner look */
+        ::-webkit-scrollbar {
+            width: 0px;
+            background: transparent;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background font-body-lg text-body-lg min-h-screen flex flex-col pb-24 md:pb-0">
+<!-- TopAppBar -->
+<header class="bg-slate-950 text-indigo-400 font-sans tracking-tight text-lg docked full-width top-0 bg-slate-900 flat no shadows flex justify-between items-center w-full px-6 py-4 sticky z-50">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-slate-400 hover:bg-slate-900/50 transition-colors cursor-pointer" data-icon="menu">menu</span>
+<span class="text-2xl font-medium tracking-widest text-slate-100">Settings</span>
+</div>
+<div>
+<span class="material-symbols-outlined text-slate-400 hover:bg-slate-900/50 transition-colors cursor-pointer" data-icon="search">search</span>
+</div>
+</header>
+<!-- Main Content -->
+<main class="flex-1 px-margin-mobile md:px-margin-desktop py-gutter max-w-3xl mx-auto w-full flex flex-col gap-8">
+<!-- Data Management Section -->
+<section class="flex flex-col gap-4">
+<h2 class="font-title-lg text-title-lg text-primary pl-2">Data Management</h2>
+<div class="bg-surface-container rounded-lg overflow-hidden">
+<div class="flex items-center justify-between p-4 hover:bg-surface-container-high transition-colors cursor-pointer border-b border-surface-container-highest">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-secondary" data-icon="upload">upload</span>
+<span class="font-body-lg text-body-lg">Export Library (JSON)</span>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="chevron_right">chevron_right</span>
+</div>
+<div class="flex items-center justify-between p-4 hover:bg-surface-container-high transition-colors cursor-pointer">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-secondary" data-icon="download">download</span>
+<span class="font-body-lg text-body-lg">Import Library (JSON)</span>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="chevron_right">chevron_right</span>
+</div>
+</div>
+</section>
+<!-- Appearance Section -->
+<section class="flex flex-col gap-4">
+<h2 class="font-title-lg text-title-lg text-primary pl-2">Appearance</h2>
+<div class="bg-surface-container rounded-lg overflow-hidden">
+<div class="flex items-center justify-between p-4 hover:bg-surface-container-high transition-colors cursor-pointer border-b border-surface-container-highest">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-secondary" data-icon="dark_mode">dark_mode</span>
+<span class="font-body-lg text-body-lg">Dark Mode</span>
+</div>
+<!-- Switch Component -->
+<button aria-checked="true" class="bg-primary relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background" role="switch" type="button">
+<span aria-hidden="true" class="translate-x-5 pointer-events-none inline-block h-5 w-5 transform rounded-full bg-surface-container shadow ring-0 transition duration-200 ease-in-out"></span>
+</button>
+</div>
+<div class="flex items-center justify-between p-4 hover:bg-surface-container-high transition-colors cursor-pointer">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-secondary" data-icon="palette">palette</span>
+<span class="font-body-lg text-body-lg">Theme Color</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="font-body-lg text-body-lg text-on-surface-variant">Deep Indigo</span>
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="chevron_right">chevron_right</span>
+</div>
+</div>
+</div>
+</section>
+<!-- General Section -->
+<section class="flex flex-col gap-4">
+<h2 class="font-title-lg text-title-lg text-primary pl-2">General</h2>
+<div class="bg-surface-container rounded-lg overflow-hidden">
+<div class="flex items-center justify-between p-4 hover:bg-surface-container-high transition-colors cursor-pointer border-b border-surface-container-highest">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-secondary" data-icon="help">help</span>
+<span class="font-body-lg text-body-lg">Help &amp; Support</span>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="chevron_right">chevron_right</span>
+</div>
+<div class="flex items-center justify-between p-4 hover:bg-surface-container-high transition-colors cursor-pointer">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-secondary" data-icon="info">info</span>
+<span class="font-body-lg text-body-lg">About Zentory</span>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="chevron_right">chevron_right</span>
+</div>
+</div>
+</section>
+<!-- Footer App Version -->
+<div class="flex justify-center mt-8 mb-4">
+<span class="font-label-md text-label-md text-on-surface-variant">Zentory Version 1.0.0</span>
+</div>
+</main>
+<!-- BottomNavBar (Mobile Only) -->
+<nav class="md:hidden bg-slate-900 text-indigo-400 text-[11px] font-medium uppercase tracking-tighter docked full-width bottom-0 rounded-t-[28px] border-t border-slate-800/50 shadow-[0_-4px_20px_0_rgba(0,0,0,0.3)] fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 pt-3 pb-6">
+<a class="flex flex-col items-center justify-center text-slate-500 px-5 py-1 hover:text-indigo-300 soft haptic scale-110 duration-150" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="library_books">library_books</span>
+<span>Library</span>
+</a>
+<a class="flex flex-col items-center justify-center text-slate-500 px-5 py-1 hover:text-indigo-300 soft haptic scale-110 duration-150" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="explore">explore</span>
+<span>Explore</span>
+</a>
+<a class="flex flex-col items-center justify-center text-slate-500 px-5 py-1 hover:text-indigo-300 soft haptic scale-110 duration-150" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="archive">archive</span>
+<span>Vault</span>
+</a>
+<!-- Active Tab -->
+<a class="flex flex-col items-center justify-center bg-emerald-400/20 text-emerald-400 rounded-full px-5 py-1 hover:text-indigo-300 soft haptic scale-110 duration-150" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="settings" data-weight="fill">settings</span>
+<span>Settings</span>
+</a>
+</nav>
+</body></html>
