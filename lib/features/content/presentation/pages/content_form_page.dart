@@ -8,6 +8,7 @@ import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/widgets/gradient_button.dart';
 import '../../domain/entities/content_item.dart';
 import '../providers/content_providers.dart';
+import '../widgets/external_search_delegate.dart';
 
 class ContentFormPage extends ConsumerStatefulWidget {
   final int? id;
@@ -30,6 +31,10 @@ class _ContentFormPageState extends ConsumerState<ContentFormPage> {
   ContentStatus _status = ContentStatus.pending;
   double _score = 0; // 0-10, mostrado como 0-5 estrellas
   bool _loading = false;
+
+  // Metadata de la API externa (se rellena al seleccionar resultado)
+  String? _externalId;
+  String? _externalSource;
 
   // Cuando se edita un item existente, guardamos su addedAt original
   // para no sobrescribirlo al guardar. Esta es una invariante del
@@ -71,6 +76,8 @@ class _ContentFormPageState extends ConsumerState<ContentFormPage> {
         _type   = item.type;
         _status = item.status;
         _score  = item.score ?? 0;
+        _externalId = item.externalId;
+        _externalSource = item.externalSource;
         _existingAddedAt = item.addedAt;
       });
     }
@@ -101,6 +108,8 @@ class _ContentFormPageState extends ConsumerState<ContentFormPage> {
       score: _score > 0 ? _score : null,
       notes: _notesCtrl.text,
       imageUrl: _imageCtrl.text,
+      externalId: _externalId,
+      externalSource: _externalSource,
       addedAt: addedAt,
       updatedAt: now,
     );
@@ -116,6 +125,23 @@ class _ContentFormPageState extends ConsumerState<ContentFormPage> {
         const SnackBar(content: Text('No se pudo guardar el contenido')),
       );
     }
+  }
+
+  /// Abre el bottom sheet de búsqueda externa y aplica el resultado.
+  Future<void> _openExternalSearch() async {
+    final result = await showExternalSearchSheet(
+      context: context,
+      type: _type,
+    );
+    if (result == null || !mounted) return;
+    setState(() {
+      _titleCtrl.text = result.title;
+      if (result.imageUrl != null && result.imageUrl!.isNotEmpty) {
+        _imageCtrl.text = result.imageUrl!;
+      }
+      _externalId = result.externalId;
+      _externalSource = result.source;
+    });
   }
 
   @override
@@ -173,20 +199,57 @@ class _ContentFormPageState extends ConsumerState<ContentFormPage> {
             ),
 
             const SizedBox(height: 28),
-            // ── Search bar (placeholder visual) ──────────────────────
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-              decoration: BoxDecoration(
-                color: AppColors.surface,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: AppColors.border),
+            // ── Search bar (busca en TMDB/RAWG/OpenLibrary) ──────────
+            GestureDetector(
+              onTap: () => _openExternalSearch(),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                decoration: BoxDecoration(
+                  color: AppColors.surface,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: AppColors.border),
+                ),
+                child: Row(children: [
+                  ShaderMask(
+                    blendMode: BlendMode.srcIn,
+                    shaderCallback: (b) => AppColors.gradientH.createShader(
+                      Rect.fromLTWH(0, 0, b.width, b.height),
+                    ),
+                    child: const Icon(Icons.travel_explore, size: 20),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      _externalSource != null
+                          ? 'Vinculado a ${_externalSource!.toUpperCase()}'
+                          : 'Buscar en línea...',
+                      style: AppTextStyles.bodyMd.copyWith(
+                        color: _externalSource != null
+                            ? AppColors.cyan
+                            : AppColors.textDisabled,
+                      ),
+                    ),
+                  ),
+                  if (_externalSource != null)
+                    GestureDetector(
+                      onTap: () => setState(() {
+                        _externalId = null;
+                        _externalSource = null;
+                      }),
+                      child: const Icon(
+                        Icons.link_off,
+                        color: AppColors.textDisabled,
+                        size: 18,
+                      ),
+                    )
+                  else
+                    const Icon(
+                      Icons.chevron_right,
+                      color: AppColors.textDisabled,
+                      size: 18,
+                    ),
+                ]),
               ),
-              child: Row(children: [
-                const Icon(Icons.search, color: AppColors.textDisabled, size: 20),
-                const SizedBox(width: 10),
-                Text('Search for title...',
-                    style: AppTextStyles.bodyMd.copyWith(color: AppColors.textDisabled)),
-              ]),
             ),
 
             const SizedBox(height: 28),
