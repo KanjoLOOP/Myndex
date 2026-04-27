@@ -91,3 +91,18 @@ final saveContentProvider = Provider<SaveContentItem>(
 final deleteContentProvider = Provider<DeleteContentItem>(
   (ref) => DeleteContentItem(ref.watch(contentRepositoryProvider)),
 );
+
+/// Alterna el estado favorito de un item y refresca las listas afectadas.
+final toggleFavoriteProvider =
+    Provider<Future<void> Function(ContentItem)>((ref) {
+  final repo = ref.watch(contentRepositoryProvider);
+  return (item) async {
+    final updated = item.copyWith(
+      isFavorite: !item.isFavorite,
+      updatedAt: DateTime.now(),
+    );
+    await repo.update(updated);
+    ref.invalidate(contentListProvider);
+    ref.invalidate(contentItemProvider(item.id!));
+  };
+});

@@ -2,13 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../features/content/presentation/pages/content_detail_page.dart';
+import '../../features/content/presentation/pages/content_form_page.dart';
 import '../../features/home/presentation/pages/home_page.dart';
 import '../../features/search/presentation/pages/search_page.dart';
 import '../../features/settings/presentation/pages/settings_page.dart';
-import '../../features/content/presentation/pages/content_detail_page.dart';
-import '../../features/content/presentation/pages/content_form_page.dart';
-import '../theme/app_colors.dart';
-import '../theme/app_text_styles.dart';
+import '../../features/stats/presentation/pages/stats_page.dart';
+import '../../features/vault/presentation/pages/collection_detail_page.dart';
+import '../../features/vault/presentation/pages/vault_page.dart';
 
 final appRouterProvider = Provider<GoRouter>((ref) {
   return GoRouter(
@@ -19,14 +20,17 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         routes: [
           GoRoute(path: '/library',  builder: (_, __) => const HomePage()),
           GoRoute(path: '/explore',  builder: (_, __) => const SearchPage()),
-          GoRoute(path: '/vault',    builder: (_, __) => const _VaultPage()),
+          GoRoute(path: '/vault',    builder: (_, __) => const VaultPage()),
           GoRoute(path: '/settings', builder: (_, __) => const SettingsPage()),
         ],
       ),
       GoRoute(
         path: '/content/:id',
-        builder: (context, state) =>
-            ContentDetailPage(id: int.parse(state.pathParameters['id']!)),
+        builder: (context, state) {
+          final id = int.tryParse(state.pathParameters['id'] ?? '');
+          if (id == null) return const _NotFoundPage();
+          return ContentDetailPage(id: id);
+        },
       ),
       GoRoute(
         path: '/content/new',
@@ -34,31 +38,36 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: '/content/:id/edit',
-        builder: (context, state) =>
-            ContentFormPage(id: int.parse(state.pathParameters['id']!)),
+        builder: (context, state) {
+          final id = int.tryParse(state.pathParameters['id'] ?? '');
+          if (id == null) return const _NotFoundPage();
+          return ContentFormPage(id: id);
+        },
+      ),
+      GoRoute(
+        path: '/vault/collection/:id',
+        builder: (context, state) {
+          final id = int.tryParse(state.pathParameters['id'] ?? '');
+          if (id == null) return const _NotFoundPage();
+          return CollectionDetailPage(collectionId: id);
+        },
+      ),
+      GoRoute(
+        path: '/stats',
+        builder: (_, __) => const StatsPage(),
       ),
     ],
   );
 });
 
-// ── Placeholder Vault ──────────────────────────────────────────────────────
-class _VaultPage extends StatelessWidget {
-  const _VaultPage();
+// ── 404 ───────────────────────────────────────────────────────────────────
+class _NotFoundPage extends StatelessWidget {
+  const _NotFoundPage();
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      body: Center(
-        child: Column(mainAxisSize: MainAxisSize.min, children: [
-          Icon(Icons.archive_outlined, size: 64, color: Theme.of(context).colorScheme.onSurfaceVariant),
-          const SizedBox(height: 16),
-          Text('Baúl', style: AppTextStyles.headlineMd.copyWith(color: Theme.of(context).colorScheme.onSurface)),
-          const SizedBox(height: 8),
-          Text('Próximamente', style: AppTextStyles.bodyMd.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
-        ]),
-      ),
-    );
-  }
+  Widget build(BuildContext context) => Scaffold(
+        appBar: AppBar(),
+        body: const Center(child: Text('Página no encontrada')),
+      );
 }
 
 // ── Shell con NavigationBar ────────────────────────────────────────────────

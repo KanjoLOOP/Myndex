@@ -28,10 +28,12 @@ extension ContentItemRowMapper on db.ContentItem {
                 .firstOrNull ??
             ContentStatus.pending,
         score: score,
+        genre: genre,
         notes: notes,
         imageUrl: imageUrl,
         externalId: externalId,
         externalSource: externalSource,
+        isFavorite: isFavorite,
         addedAt: addedAt,
         updatedAt: updatedAt,
       );
@@ -48,10 +50,12 @@ extension ContentItemEntityMapper on ContentItem {
         type: type.name,
         status: status.name,
         score: Value(score),
+        genre: Value(genre),
         notes: Value(notes),
         imageUrl: Value(imageUrl),
         externalId: Value(externalId),
         externalSource: Value(externalSource),
+        isFavorite: Value(isFavorite),
         addedAt: Value(addedAt),
         updatedAt: Value(updatedAt),
       );
@@ -69,10 +73,12 @@ extension ContentItemEntityMapper on ContentItem {
         type: Value(type.name),
         status: Value(status.name),
         score: Value(score),
+        genre: Value(genre),
         notes: Value(notes),
         imageUrl: Value(imageUrl),
         externalId: Value(externalId),
         externalSource: Value(externalSource),
+        isFavorite: Value(isFavorite),
         // NO incluimos addedAt: queda absent → no se modifica.
         updatedAt: Value(updatedAt),
       );

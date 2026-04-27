@@ -15,6 +15,7 @@ abstract class ContentRepository {
     ContentType? filterType,
     ContentStatus? filterStatus,
     double? minScore,
+    bool? filterFavorite,
   });
 
   /// Obtiene un item por id, o `null` si no existe.

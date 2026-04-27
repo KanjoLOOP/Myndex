@@ -114,7 +114,7 @@ class ExternalSearchRepository {
   Future<List<ExternalSearchResult>> _searchBooks(String q) async {
     final raw = await _openLibrary.searchBooks(q);
     return raw.map((r) {
-      final authors = (r['author_name'] as List?)?.cast<String>().take(2).join(', ');
+      final authors = (r['author_name'] as List?)?.whereType<String>().take(2).join(', ');
       final coverId = r['cover_i'];
       return ExternalSearchResult(
         externalId: (r['key'] as String?) ?? '',

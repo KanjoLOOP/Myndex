@@ -1,5 +1,4 @@
 import 'package:drift/drift.dart';
-import 'package:drift_flutter/drift_flutter.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../constants/app_constants.dart';
@@ -36,17 +35,35 @@ class ContentItems extends Table {
   RealColumn get score => real().nullable()();
   TextColumn get notes => text().nullable()();
   TextColumn get imageUrl => text().nullable()();
+  TextColumn get genre => text().nullable()();            // género(s) libre, ej. "Acción, Aventura"
   TextColumn get externalId => text().nullable()();      // id de TMDB/RAWG/etc.
   TextColumn get externalSource => text().nullable()();  // 'tmdb','rawg','openlibrary'
+  BoolColumn get isFavorite => boolean().withDefault(const Constant(false))();
   DateTimeColumn get addedAt => dateTime().withDefault(currentDateAndTime)();
   DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
 }
 
+/// Colecciones personalizadas del usuario.
+class Collections extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get name => text().withLength(min: 1, max: 200)();
+  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+}
+
+/// Relación N:M entre colecciones e items de contenido.
+class CollectionItems extends Table {
+  IntColumn get collectionId => integer()();
+  IntColumn get contentItemId => integer()();
+
+  @override
+  Set<Column> get primaryKey => {collectionId, contentItemId};
+}
+
 // ─── Base de datos ────────────────────────────────────────────────
 
-@DriftDatabase(tables: [ContentItems])
+@DriftDatabase(tables: [ContentItems, Collections, CollectionItems])
 class AppDatabase extends _$AppDatabase {
-  AppDatabase() : super(_openConnection());
+  AppDatabase(super.executor);
 
   /// Constructor inyectable para tests (DB en memoria).
   AppDatabase.forTesting(super.executor);
@@ -54,19 +71,19 @@ class AppDatabase extends _$AppDatabase {
   @override
   int get schemaVersion => AppConstants.dbVersion;
 
-  /// Conexión por defecto.
-  ///
-  /// `drift_flutter` resuelve la ruta al directorio privado de la
-  /// app para SQLite y configura el aislado de fondo automáticamente.
-  static QueryExecutor _openConnection() {
-    return driftDatabase(
-      name: AppConstants.dbName,
-      web: DriftWebOptions(
-        sqlite3Wasm: Uri.parse('sqlite3.wasm'),
-        driftWorker: Uri.parse('drift_worker.js'),
-      ),
-    );
-  }
+  @override
+  MigrationStrategy get migration => MigrationStrategy(
+    onUpgrade: (migrator, from, to) async {
+      if (from < 2) {
+        await migrator.addColumn(contentItems, contentItems.genre);
+      }
+      if (from < 3) {
+        await migrator.addColumn(contentItems, contentItems.isFavorite);
+        await migrator.createTable(collections);
+        await migrator.createTable(collectionItems);
+      }
+    },
+  );
 }
 
 // ─── Provider ─────────────────────────────────────────────────────

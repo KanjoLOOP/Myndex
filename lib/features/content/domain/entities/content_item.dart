@@ -37,6 +37,12 @@ class ContentItem {
   /// Notas personales del usuario. Texto libre.
   final String? notes;
 
+  /// Géneros del contenido (texto libre, ej. "Acción, Aventura").
+  final String? genre;
+
+  /// Marcado como favorito por el usuario.
+  final bool isFavorite;
+
   /// URL de la imagen de portada (https only). Puede venir de TMDB,
   /// Open Library, RAWG o ser introducida manualmente por el usuario.
   final String? imageUrl;
@@ -60,10 +66,12 @@ class ContentItem {
     required this.type,
     required this.status,
     this.score,
+    this.genre,
     this.notes,
     this.imageUrl,
     this.externalId,
     this.externalSource,
+    this.isFavorite = false,
     required this.addedAt,
     required this.updatedAt,
   });
@@ -75,15 +83,16 @@ class ContentItem {
     ContentType? type,
     ContentStatus? status,
     double? score,
+    String? genre,
     String? notes,
     String? imageUrl,
     String? externalId,
     String? externalSource,
+    bool? isFavorite,
     DateTime? addedAt,
     DateTime? updatedAt,
-    // Flags explícitos para poner valores a null sin colisionar con
-    // el patrón `?? this.x`.
     bool clearScore = false,
+    bool clearGenre = false,
     bool clearNotes = false,
     bool clearImageUrl = false,
     bool clearExternalId = false,
@@ -95,11 +104,13 @@ class ContentItem {
       type: type ?? this.type,
       status: status ?? this.status,
       score: clearScore ? null : (score ?? this.score),
+      genre: clearGenre ? null : (genre ?? this.genre),
       notes: clearNotes ? null : (notes ?? this.notes),
       imageUrl: clearImageUrl ? null : (imageUrl ?? this.imageUrl),
       externalId: clearExternalId ? null : (externalId ?? this.externalId),
       externalSource:
           clearExternalSource ? null : (externalSource ?? this.externalSource),
+      isFavorite: isFavorite ?? this.isFavorite,
       addedAt: addedAt ?? this.addedAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );
@@ -116,10 +127,12 @@ class ContentItem {
         'type': type.name,
         'status': status.name,
         'score': score,
+        'genre': genre,
         'notes': notes,
         'imageUrl': imageUrl,
         'externalId': externalId,
         'externalSource': externalSource,
+        'isFavorite': isFavorite,
         'addedAt': addedAt.toIso8601String(),
         'updatedAt': updatedAt.toIso8601String(),
       };
@@ -174,10 +187,12 @@ class ContentItem {
       type: type,
       status: status,
       score: (json['score'] as num?)?.toDouble(),
+      genre: json['genre'] as String?,
       notes: json['notes'] as String?,
       imageUrl: json['imageUrl'] as String?,
       externalId: json['externalId'] as String?,
       externalSource: json['externalSource'] as String?,
+      isFavorite: json['isFavorite'] as bool? ?? false,
       addedAt: parseDate(json['addedAt'], 'addedAt'),
       updatedAt: parseDate(json['updatedAt'], 'updatedAt'),
     );

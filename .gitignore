@@ -68,7 +68,8 @@ lcov.info
 # OS
 .DS_Store
 Thumbs.db
-
 # Claude Code local artifacts
 .claude/
 
+# Native libs that are downloaded by sqlite3_flutter_libs
+sqlite3.dll

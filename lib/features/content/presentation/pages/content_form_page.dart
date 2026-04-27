@@ -21,8 +21,6 @@ class ContentFormPage extends ConsumerStatefulWidget {
 class _ContentFormPageState extends ConsumerState<ContentFormPage> {
   final _formKey = GlobalKey<FormState>();
   late final TextEditingController _titleCtrl;
-  // Se conserva el controlador de género para futura extensión del
-  // modelo, pero hoy no se persiste (no hay columna `genre` en la DB).
   late final TextEditingController _genreCtrl;
   late final TextEditingController _notesCtrl;
   late final TextEditingController _imageCtrl;
@@ -71,6 +69,7 @@ class _ContentFormPageState extends ConsumerState<ContentFormPage> {
     if (item != null && mounted) {
       setState(() {
         _titleCtrl.text = item.title;
+        _genreCtrl.text = item.genre ?? '';
         _notesCtrl.text = item.notes ?? '';
         _imageCtrl.text = item.imageUrl ?? '';
         _type   = item.type;
@@ -100,12 +99,14 @@ class _ContentFormPageState extends ConsumerState<ContentFormPage> {
     // El repositorio vuelve a forzar este invariante por si acaso.
     final addedAt = _existingAddedAt ?? now;
 
+    final genre = _genreCtrl.text.trim();
     final item = ContentItem(
       id: widget.id,
       title: _titleCtrl.text,
       type: _type,
       status: _status,
       score: _score > 0 ? _score : null,
+      genre: genre.isNotEmpty ? genre : null,
       notes: _notesCtrl.text,
       imageUrl: _imageCtrl.text,
       externalId: _externalId,
@@ -294,7 +295,8 @@ class _ContentFormPageState extends ConsumerState<ContentFormPage> {
                 final uri = Uri.tryParse(v.trim());
                 if (uri == null ||
                     (uri.scheme != 'http' && uri.scheme != 'https') ||
-                    !uri.hasAuthority) {
+                    !uri.hasAuthority ||
+                    uri.host.isEmpty) {
                   return 'Solo se admiten URLs http/https';
                 }
                 return null;
