@@ -7,6 +7,7 @@ import '../../features/content/presentation/pages/content_form_page.dart';
 import '../../features/home/presentation/pages/home_page.dart';
 import '../../features/search/presentation/pages/search_page.dart';
 import '../../features/settings/presentation/pages/settings_page.dart';
+import '../../features/stats/presentation/pages/stats_page.dart';
 import '../../features/vault/presentation/pages/collection_detail_page.dart';
 import '../../features/vault/presentation/pages/vault_page.dart';
 
@@ -41,6 +42,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: '/vault/collection/:id',
         builder: (context, state) => CollectionDetailPage(
             collectionId: int.parse(state.pathParameters['id']!)),
+      ),
+      GoRoute(
+        path: '/stats',
+        builder: (_, __) => const StatsPage(),
       ),
     ],
   );

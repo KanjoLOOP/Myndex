@@ -171,6 +171,12 @@ class _HomePageState extends ConsumerState<HomePage> {
         ),
         actions: [
           IconButton(
+            icon: Icon(Icons.bar_chart_outlined,
+                color: Theme.of(context).colorScheme.onSurfaceVariant),
+            onPressed: () => context.push('/stats'),
+            tooltip: 'Estadísticas',
+          ),
+          IconButton(
             icon: Icon(Icons.search,
                 color: Theme.of(context).colorScheme.onSurfaceVariant),
             onPressed: () => context.go('/explore'),
