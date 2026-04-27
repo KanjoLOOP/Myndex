@@ -34,17 +34,40 @@ class ContentCard extends StatelessWidget {
           children: [
             // ── Portada ────────────────────────────────────────────────
             Expanded(
-              child: ClipRRect(
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
-                child: item.imageUrl != null && item.imageUrl!.isNotEmpty
-                    ? CachedNetworkImage(
-                        imageUrl: item.imageUrl!,
-                        fit: BoxFit.cover,
-                        width: double.infinity,
-                        placeholder: (_, __) => _Placeholder(item.type),
-                        errorWidget: (_, __, ___) => _Placeholder(item.type),
-                      )
-                    : _Placeholder(item.type),
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  ClipRRect(
+                    borderRadius:
+                        const BorderRadius.vertical(top: Radius.circular(16)),
+                    child: item.imageUrl != null && item.imageUrl!.isNotEmpty
+                        ? CachedNetworkImage(
+                            imageUrl: item.imageUrl!,
+                            fit: BoxFit.cover,
+                            width: double.infinity,
+                            placeholder: (_, __) => _Placeholder(item.type),
+                            errorWidget: (_, __, ___) => _Placeholder(item.type),
+                          )
+                        : _Placeholder(item.type),
+                  ),
+                  if (item.isFavorite)
+                    Positioned(
+                      top: 6,
+                      right: 6,
+                      child: Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: const BoxDecoration(
+                          color: Colors.black54,
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(
+                          Icons.favorite,
+                          color: Color(0xFFFF6B6B),
+                          size: 14,
+                        ),
+                      ),
+                    ),
+                ],
               ),
             ),
             // ── Metadata ───────────────────────────────────────────────

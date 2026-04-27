@@ -40,6 +40,9 @@ class ContentItem {
   /// Géneros del contenido (texto libre, ej. "Acción, Aventura").
   final String? genre;
 
+  /// Marcado como favorito por el usuario.
+  final bool isFavorite;
+
   /// URL de la imagen de portada (https only). Puede venir de TMDB,
   /// Open Library, RAWG o ser introducida manualmente por el usuario.
   final String? imageUrl;
@@ -68,6 +71,7 @@ class ContentItem {
     this.imageUrl,
     this.externalId,
     this.externalSource,
+    this.isFavorite = false,
     required this.addedAt,
     required this.updatedAt,
   });
@@ -84,6 +88,7 @@ class ContentItem {
     String? imageUrl,
     String? externalId,
     String? externalSource,
+    bool? isFavorite,
     DateTime? addedAt,
     DateTime? updatedAt,
     bool clearScore = false,
@@ -105,6 +110,7 @@ class ContentItem {
       externalId: clearExternalId ? null : (externalId ?? this.externalId),
       externalSource:
           clearExternalSource ? null : (externalSource ?? this.externalSource),
+      isFavorite: isFavorite ?? this.isFavorite,
       addedAt: addedAt ?? this.addedAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );
@@ -126,6 +132,7 @@ class ContentItem {
         'imageUrl': imageUrl,
         'externalId': externalId,
         'externalSource': externalSource,
+        'isFavorite': isFavorite,
         'addedAt': addedAt.toIso8601String(),
         'updatedAt': updatedAt.toIso8601String(),
       };
@@ -185,6 +192,7 @@ class ContentItem {
       imageUrl: json['imageUrl'] as String?,
       externalId: json['externalId'] as String?,
       externalSource: json['externalSource'] as String?,
+      isFavorite: json['isFavorite'] as bool? ?? false,
       addedAt: parseDate(json['addedAt'], 'addedAt'),
       updatedAt: parseDate(json['updatedAt'], 'updatedAt'),
     );

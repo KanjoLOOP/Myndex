@@ -39,13 +39,30 @@ class ContentItems extends Table {
   TextColumn get genre => text().nullable()();            // género(s) libre, ej. "Acción, Aventura"
   TextColumn get externalId => text().nullable()();      // id de TMDB/RAWG/etc.
   TextColumn get externalSource => text().nullable()();  // 'tmdb','rawg','openlibrary'
+  BoolColumn get isFavorite => boolean().withDefault(const Constant(false))();
   DateTimeColumn get addedAt => dateTime().withDefault(currentDateAndTime)();
   DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
 }
 
+/// Colecciones personalizadas del usuario.
+class Collections extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get name => text().withLength(min: 1, max: 200)();
+  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+}
+
+/// Relación N:M entre colecciones e items de contenido.
+class CollectionItems extends Table {
+  IntColumn get collectionId => integer()();
+  IntColumn get contentItemId => integer()();
+
+  @override
+  Set<Column> get primaryKey => {collectionId, contentItemId};
+}
+
 // ─── Base de datos ────────────────────────────────────────────────
 
-@DriftDatabase(tables: [ContentItems])
+@DriftDatabase(tables: [ContentItems, Collections, CollectionItems])
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
@@ -60,6 +77,11 @@ class AppDatabase extends _$AppDatabase {
     onUpgrade: (migrator, from, to) async {
       if (from < 2) {
         await migrator.addColumn(contentItems, contentItems.genre);
+      }
+      if (from < 3) {
+        await migrator.addColumn(contentItems, contentItems.isFavorite);
+        await migrator.createTable(collections);
+        await migrator.createTable(collectionItems);
       }
     },
   );

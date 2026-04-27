@@ -19,11 +19,13 @@ class ContentRepositoryImpl implements ContentRepository {
     ContentType? filterType,
     ContentStatus? filterStatus,
     double? minScore,
+    bool? filterFavorite,
   }) =>
       _local.getAll(
         filterType: filterType,
         filterStatus: filterStatus,
         minScore: minScore,
+        filterFavorite: filterFavorite,
       );
 
   @override

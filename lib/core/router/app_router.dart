@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../features/content/presentation/pages/content_detail_page.dart';
+import '../../features/content/presentation/pages/content_form_page.dart';
 import '../../features/home/presentation/pages/home_page.dart';
 import '../../features/search/presentation/pages/search_page.dart';
 import '../../features/settings/presentation/pages/settings_page.dart';
-import '../../features/content/presentation/pages/content_detail_page.dart';
-import '../../features/content/presentation/pages/content_form_page.dart';
-import '../theme/app_colors.dart';
-import '../theme/app_text_styles.dart';
+import '../../features/vault/presentation/pages/collection_detail_page.dart';
+import '../../features/vault/presentation/pages/vault_page.dart';
 
 final appRouterProvider = Provider<GoRouter>((ref) {
   return GoRouter(
@@ -19,7 +19,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         routes: [
           GoRoute(path: '/library',  builder: (_, __) => const HomePage()),
           GoRoute(path: '/explore',  builder: (_, __) => const SearchPage()),
-          GoRoute(path: '/vault',    builder: (_, __) => const _VaultPage()),
+          GoRoute(path: '/vault',    builder: (_, __) => const VaultPage()),
           GoRoute(path: '/settings', builder: (_, __) => const SettingsPage()),
         ],
       ),
@@ -37,29 +37,14 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) =>
             ContentFormPage(id: int.parse(state.pathParameters['id']!)),
       ),
+      GoRoute(
+        path: '/vault/collection/:id',
+        builder: (context, state) => CollectionDetailPage(
+            collectionId: int.parse(state.pathParameters['id']!)),
+      ),
     ],
   );
 });
-
-// ── Placeholder Vault ──────────────────────────────────────────────────────
-class _VaultPage extends StatelessWidget {
-  const _VaultPage();
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      body: Center(
-        child: Column(mainAxisSize: MainAxisSize.min, children: [
-          Icon(Icons.archive_outlined, size: 64, color: Theme.of(context).colorScheme.onSurfaceVariant),
-          const SizedBox(height: 16),
-          Text('Baúl', style: AppTextStyles.headlineMd.copyWith(color: Theme.of(context).colorScheme.onSurface)),
-          const SizedBox(height: 8),
-          Text('Próximamente', style: AppTextStyles.bodyMd.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
-        ]),
-      ),
-    );
-  }
-}
 
 // ── Shell con NavigationBar ────────────────────────────────────────────────
 class _ScaffoldWithNav extends StatefulWidget {

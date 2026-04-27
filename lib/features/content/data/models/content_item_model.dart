@@ -33,6 +33,7 @@ extension ContentItemRowMapper on db.ContentItem {
         imageUrl: imageUrl,
         externalId: externalId,
         externalSource: externalSource,
+        isFavorite: isFavorite,
         addedAt: addedAt,
         updatedAt: updatedAt,
       );
@@ -54,6 +55,7 @@ extension ContentItemEntityMapper on ContentItem {
         imageUrl: Value(imageUrl),
         externalId: Value(externalId),
         externalSource: Value(externalSource),
+        isFavorite: Value(isFavorite),
         addedAt: Value(addedAt),
         updatedAt: Value(updatedAt),
       );
@@ -76,6 +78,7 @@ extension ContentItemEntityMapper on ContentItem {
         imageUrl: Value(imageUrl),
         externalId: Value(externalId),
         externalSource: Value(externalSource),
+        isFavorite: Value(isFavorite),
         // NO incluimos addedAt: queda absent → no se modifica.
         updatedAt: Value(updatedAt),
       );

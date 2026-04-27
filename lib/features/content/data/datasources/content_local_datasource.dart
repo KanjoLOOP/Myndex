@@ -29,6 +29,7 @@ class ContentLocalDatasource {
     ContentType? filterType,
     ContentStatus? filterStatus,
     double? minScore,
+    bool? filterFavorite,
   }) async {
     final query = _db.select(_db.contentItems);
 
@@ -40,6 +41,9 @@ class ContentLocalDatasource {
     }
     if (minScore != null) {
       query.where((t) => t.score.isBiggerOrEqualValue(minScore));
+    }
+    if (filterFavorite != null) {
+      query.where((t) => t.isFavorite.equals(filterFavorite));
     }
 
     query.orderBy([(t) => OrderingTerm.desc(t.addedAt)]);
