@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../../../../core/constants/content_types.dart';
 import '../../../../core/database/app_database.dart';
 import '../../data/datasources/content_local_datasource.dart';
@@ -9,24 +10,37 @@ import '../../domain/usecases/delete_content_item.dart';
 import '../../domain/usecases/get_content_list.dart';
 import '../../domain/usecases/save_content_item.dart';
 
-// --- Infra providers ---
+// ─── Infraestructura ──────────────────────────────────────────────
 
+/// Datasource local. Depende del [databaseProvider] que se inyecta
+/// en `main.dart`. En tests se sobrescribe con una DB en memoria.
 final contentLocalDatasourceProvider = Provider<ContentLocalDatasource>(
   (ref) => ContentLocalDatasource(ref.watch(databaseProvider)),
 );
 
+/// Repositorio de contenido (única implementación: ContentRepositoryImpl).
 final contentRepositoryProvider = Provider<ContentRepository>(
   (ref) => ContentRepositoryImpl(ref.watch(contentLocalDatasourceProvider)),
 );
 
-// --- Filter state ---
+// ─── Estado de filtros ────────────────────────────────────────────
 
+/// Estado inmutable de filtros aplicado a la lista principal.
+///
+/// Se gestiona con un [StateProvider] simple porque solo cambia desde
+/// la propia pantalla de Library. Si en el futuro hubiera que
+/// persistirlo o compartirlo entre pantallas, migrar a
+/// [StateNotifierProvider].
 class FilterState {
   final ContentType? type;
   final ContentStatus? status;
   final double? minScore;
+
   const FilterState({this.type, this.status, this.minScore});
 
+  /// Devuelve una copia con valores sustituidos. Los flags `clearXxx`
+  /// permiten poner el campo a null explícitamente, lo cual no es
+  /// posible con `?? this.x` cuando se quiere "limpiar" un filtro.
   FilterState copyWith({
     ContentType? type,
     ContentStatus? status,
@@ -45,8 +59,10 @@ class FilterState {
 final filterStateProvider =
     StateProvider<FilterState>((_) => const FilterState());
 
-// --- Content list ---
+// ─── Lista principal ──────────────────────────────────────────────
 
+/// Lista de contenido filtrada. Se invalida (`ref.invalidate(...)`)
+/// tras cualquier mutación (alta, edición, borrado, import).
 final contentListProvider = FutureProvider<List<ContentItem>>((ref) {
   final repo = ref.watch(contentRepositoryProvider);
   final filter = ref.watch(filterStateProvider);
@@ -57,15 +73,16 @@ final contentListProvider = FutureProvider<List<ContentItem>>((ref) {
   );
 });
 
-// --- Single item ---
+// ─── Item individual ──────────────────────────────────────────────
 
+/// Provider parametrizado por id para la pantalla de detalle/edición.
 final contentItemProvider =
     FutureProvider.family<ContentItem?, int>((ref, id) {
   final repo = ref.watch(contentRepositoryProvider);
   return repo.getById(id);
 });
 
-// --- Actions ---
+// ─── Acciones ─────────────────────────────────────────────────────
 
 final saveContentProvider = Provider<SaveContentItem>(
   (ref) => SaveContentItem(ref.watch(contentRepositoryProvider)),
