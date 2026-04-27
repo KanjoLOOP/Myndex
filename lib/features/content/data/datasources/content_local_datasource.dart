@@ -1,7 +1,7 @@
 import 'package:drift/drift.dart';
 
 import '../../../../core/constants/content_types.dart';
-import '../../../../core/database/app_database.dart';
+import '../../../../core/database/app_database.dart' hide ContentItem;
 import '../../../../core/security/input_sanitizer.dart';
 import '../../domain/entities/content_item.dart';
 import '../models/content_item_model.dart';

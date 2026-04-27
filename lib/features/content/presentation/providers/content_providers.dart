@@ -1,7 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/constants/content_types.dart';
-import '../../../../core/database/app_database.dart';
+import '../../../../core/database/app_database.dart' show databaseProvider;
 import '../../data/datasources/content_local_datasource.dart';
 import '../../data/repositories/content_repository_impl.dart';
 import '../../domain/entities/content_item.dart';

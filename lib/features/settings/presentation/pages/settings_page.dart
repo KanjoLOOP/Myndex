@@ -129,8 +129,9 @@ class SettingsPage extends ConsumerWidget {
       final dir = await getApplicationDocumentsDirectory();
       final path = await service.exportToFile(dir);
       if (!context.mounted) return;
-      await SharePlus.instance.share(
-        ShareParams(files: [XFile(path)], text: 'Myndex backup'),
+      await Share.shareXFiles(
+        [XFile(path)],
+        text: 'Myndex backup',
       );
     } catch (e) {
       if (!context.mounted) return;

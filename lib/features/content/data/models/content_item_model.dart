@@ -1,7 +1,8 @@
 import 'package:drift/drift.dart';
 
 import '../../../../core/constants/content_types.dart';
-import '../../../../core/database/app_database.dart';
+import '../../../../core/database/app_database.dart' hide ContentItem;
+import '../../../../core/database/app_database.dart' as db show ContentItem;
 import '../../domain/entities/content_item.dart';
 
 /// Mappers entre la fila de Drift y la entidad de dominio.
@@ -9,7 +10,7 @@ import '../../domain/entities/content_item.dart';
 /// Mantenemos la frontera entre capa de datos y dominio: la UI nunca
 /// debe ver un `ContentItem$` (clase generada por Drift). Eso permite
 /// cambiar el motor de persistencia sin tocar la presentación.
-extension ContentItemRowMapper on ContentItem$ {
+extension ContentItemRowMapper on db.ContentItem {
   /// Convierte la fila Drift en entidad de dominio.
   ///
   /// Tolera valores corruptos en `type` y `status` cayendo a `other`/
