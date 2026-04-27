@@ -20,11 +20,11 @@ class _HomePageState extends ConsumerState<HomePage> {
   ContentType? _selectedType;
 
   static const _typeFilters = [
-    (label: 'All',     type: null as ContentType?),
-    (label: 'Movies',  type: ContentType.movie),
+    (label: 'Todo',    type: null as ContentType?),
+    (label: 'Cine',    type: ContentType.movie),
     (label: 'Series',  type: ContentType.series),
-    (label: 'Books',   type: ContentType.book),
-    (label: 'Games',   type: ContentType.game),
+    (label: 'Libros',  type: ContentType.book),
+    (label: 'Juegos',  type: ContentType.game),
     (label: 'Anime',   type: ContentType.anime),
   ];
 
@@ -35,9 +35,9 @@ class _HomePageState extends ConsumerState<HomePage> {
     final asyncItems = ref.watch(contentListProvider);
 
     return Scaffold(
-      backgroundColor: AppColors.bgPrimary,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: AppColors.bgPrimary,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         titleSpacing: 20,
         title: GradientText(
           'Myndex',
@@ -45,7 +45,7 @@ class _HomePageState extends ConsumerState<HomePage> {
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.search, color: AppColors.textSecondary),
+            icon: Icon(Icons.search, color: Theme.of(context).colorScheme.onSurfaceVariant),
             onPressed: () => context.go('/explore'),
           ),
           const SizedBox(width: 8),
@@ -147,11 +147,11 @@ class _FilterChip extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(
-          color: AppColors.surface,
+          color: Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: AppColors.border),
+          border: Border.all(color: Theme.of(context).dividerColor),
         ),
-        child: Text(label, style: AppTextStyles.labelMd),
+        child: Text(label, style: AppTextStyles.labelMd.copyWith(color: Theme.of(context).colorScheme.onSurface)),
       ),
     );
   }
@@ -197,22 +197,22 @@ class _EmptyState extends StatelessWidget {
         Container(
           width: 80, height: 80,
           decoration: BoxDecoration(
-            color: AppColors.surface,
+            color: Theme.of(context).colorScheme.surface,
             borderRadius: BorderRadius.circular(20),
           ),
-          child: const Icon(Icons.movie_filter_outlined, size: 40, color: AppColors.textDisabled),
+          child: Icon(Icons.movie_filter_outlined, size: 40, color: Theme.of(context).colorScheme.onSurfaceVariant),
         ),
         const SizedBox(height: 20),
         Text(
           hasFilter ? 'Sin resultados' : 'Tu biblioteca está vacía',
-          style: AppTextStyles.titleMd,
+          style: AppTextStyles.titleMd.copyWith(color: Theme.of(context).colorScheme.onSurface),
         ),
         const SizedBox(height: 8),
         Text(
           hasFilter
               ? 'Prueba con otro filtro'
               : 'Pulsa + para añadir tu primer contenido',
-          style: AppTextStyles.bodyMd,
+          style: AppTextStyles.bodyMd.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant),
           textAlign: TextAlign.center,
         ),
       ]),

@@ -25,9 +25,9 @@ class ContentCard extends StatelessWidget {
       onTap: onTap,
       child: Container(
         decoration: BoxDecoration(
-          color: AppColors.bgSecondary,
+          color: Theme.of(context).cardTheme.color,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: AppColors.border),
+          border: Border.all(color: Theme.of(context).dividerColor),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -109,9 +109,9 @@ class _Placeholder extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: AppColors.surface,
+      color: Theme.of(context).colorScheme.surface,
       child: Center(
-        child: Icon(icon, size: 40, color: AppColors.textDisabled),
+        child: Icon(icon, size: 40, color: Theme.of(context).colorScheme.onSurfaceVariant),
       ),
     );
   }

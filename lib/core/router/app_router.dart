@@ -47,14 +47,14 @@ class _VaultPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.bgPrimary,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: Center(
         child: Column(mainAxisSize: MainAxisSize.min, children: [
-          const Icon(Icons.archive_outlined, size: 64, color: AppColors.textDisabled),
+          Icon(Icons.archive_outlined, size: 64, color: Theme.of(context).colorScheme.onSurfaceVariant),
           const SizedBox(height: 16),
-          Text('Vault', style: AppTextStyles.headlineMd.copyWith(color: AppColors.textSecondary)),
+          Text('Baúl', style: AppTextStyles.headlineMd.copyWith(color: Theme.of(context).colorScheme.onSurface)),
           const SizedBox(height: 8),
-          Text('Próximamente', style: AppTextStyles.bodyMd),
+          Text('Próximamente', style: AppTextStyles.bodyMd.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
         ]),
       ),
     );
@@ -86,12 +86,12 @@ class _ScaffoldWithNavState extends State<_ScaffoldWithNav> {
     final selectedIndex = _indexFromLocation(location);
 
     return Scaffold(
-      backgroundColor: AppColors.bgPrimary,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: widget.child,
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
-          color: AppColors.bgSecondary,
-          border: Border(top: BorderSide(color: AppColors.border, width: 1)),
+          color: Theme.of(context).cardTheme.color,
+          border: Border(top: BorderSide(color: Theme.of(context).dividerColor, width: 1)),
         ),
         child: NavigationBar(
           selectedIndex: selectedIndex,
@@ -99,27 +99,27 @@ class _ScaffoldWithNavState extends State<_ScaffoldWithNav> {
           backgroundColor: Colors.transparent,
           surfaceTintColor: Colors.transparent,
           shadowColor: Colors.transparent,
-          indicatorColor: AppColors.blue.withOpacity(0.2),
+          indicatorColor: Theme.of(context).colorScheme.primary.withValues(alpha: 0.2),
           destinations: const [
             NavigationDestination(
               icon: Icon(Icons.video_library_outlined),
               selectedIcon: Icon(Icons.video_library),
-              label: 'Library',
+              label: 'Biblioteca',
             ),
             NavigationDestination(
               icon: Icon(Icons.explore_outlined),
               selectedIcon: Icon(Icons.explore),
-              label: 'Explore',
+              label: 'Explorar',
             ),
             NavigationDestination(
               icon: Icon(Icons.archive_outlined),
               selectedIcon: Icon(Icons.archive),
-              label: 'Vault',
+              label: 'Baúl',
             ),
             NavigationDestination(
               icon: Icon(Icons.settings_outlined),
               selectedIcon: Icon(Icons.settings),
-              label: 'Settings',
+              label: 'Ajustes',
             ),
           ],
         ),

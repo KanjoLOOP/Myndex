@@ -31,32 +31,32 @@ class ContentDetailPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final asyncItem = ref.watch(contentItemProvider(id));
     return asyncItem.when(
-      loading: () => const Scaffold(
-        backgroundColor: AppColors.bgPrimary,
-        body: Center(child: CircularProgressIndicator(color: AppColors.cyan)),
+      loading: () => Scaffold(
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        body: const Center(child: CircularProgressIndicator(color: AppColors.cyan)),
       ),
       error: (e, _) => Scaffold(
-        backgroundColor: AppColors.bgPrimary,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         body: Center(child: Text('Error: $e')),
       ),
       data: (item) {
         if (item == null) {
           return Scaffold(
-            backgroundColor: AppColors.bgPrimary,
+            backgroundColor: Theme.of(context).scaffoldBackgroundColor,
             appBar: AppBar(),
             body: const Center(child: Text('Contenido no encontrado')),
           );
         }
 
         return Scaffold(
-          backgroundColor: AppColors.bgPrimary,
+          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
           body: CustomScrollView(
             slivers: [
               // ── Hero image ──────────────────────────────────────────
               SliverAppBar(
                 expandedHeight: 320,
                 pinned: true,
-                backgroundColor: AppColors.bgPrimary,
+                backgroundColor: Theme.of(context).scaffoldBackgroundColor,
                 leading: GestureDetector(
                   onTap: () => context.pop(),
                   child: Container(
@@ -92,9 +92,9 @@ class ContentDetailPage extends ConsumerWidget {
                           fit: BoxFit.cover,
                         )
                       else
-                        Container(color: AppColors.surface,
-                            child: const Icon(Icons.image_not_supported_outlined,
-                                size: 64, color: AppColors.textDisabled)),
+                        Container(color: Theme.of(context).colorScheme.surface,
+                            child: Icon(Icons.image_not_supported_outlined,
+                                size: 64, color: Theme.of(context).colorScheme.onSurfaceVariant)),
                       // Gradient overlay bottom
                       Positioned.fill(
                         child: DecoratedBox(
@@ -104,8 +104,8 @@ class ContentDetailPage extends ConsumerWidget {
                               end: Alignment.bottomCenter,
                               colors: [
                                 Colors.transparent,
-                                AppColors.bgPrimary.withOpacity(0.8),
-                                AppColors.bgPrimary,
+                                Theme.of(context).scaffoldBackgroundColor.withOpacity(0.8),
+                                Theme.of(context).scaffoldBackgroundColor,
                               ],
                               stops: const [0.5, 0.85, 1.0],
                             ),
@@ -144,7 +144,7 @@ class ContentDetailPage extends ConsumerWidget {
 
                     // Rating
                     if (item.score != null) ...[
-                      Text('Your Rating', style: AppTextStyles.titleMd),
+                      Text('Tu valoración', style: AppTextStyles.titleMd.copyWith(color: Theme.of(context).colorScheme.onSurface)),
                       const SizedBox(height: 10),
                       _StarRating(score: item.score!),
                       const SizedBox(height: 20),
@@ -152,19 +152,19 @@ class ContentDetailPage extends ConsumerWidget {
 
                     // Botones acción
                     GradientButton(
-                      label: 'Edit Entry',
+                      label: 'Editar entrada',
                       icon: Icons.edit_outlined,
                       onPressed: () => context.push('/content/${item.id}/edit'),
                     ),
                     const SizedBox(height: 10),
                     OutlinedButton.icon(
                       onPressed: () => _confirmDelete(context, ref),
-                      icon: const Icon(Icons.archive_outlined, color: AppColors.textSecondary),
-                      label: Text('Archive',
-                          style: AppTextStyles.bodyMd.copyWith(color: AppColors.textSecondary)),
+                      icon: Icon(Icons.archive_outlined, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                      label: Text('Archivar',
+                          style: AppTextStyles.bodyMd.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
                       style: OutlinedButton.styleFrom(
                         minimumSize: const Size(double.infinity, 52),
-                        side: const BorderSide(color: AppColors.border),
+                        side: BorderSide(color: Theme.of(context).dividerColor),
                         shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(28)),
                       ),
@@ -173,16 +173,16 @@ class ContentDetailPage extends ConsumerWidget {
                     // Notas personales
                     if (item.notes != null && item.notes!.isNotEmpty) ...[
                       const SizedBox(height: 28),
-                      _SectionHeader('Personal Notes'),
+                      const _SectionHeader('Notas personales'),
                       const SizedBox(height: 10),
                       Container(
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
-                          color: AppColors.bgSecondary,
+                          color: Theme.of(context).cardTheme.color,
                           borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: AppColors.border),
+                          border: Border.all(color: Theme.of(context).dividerColor),
                         ),
-                        child: Text(item.notes!, style: AppTextStyles.bodyLg),
+                        child: Text(item.notes!, style: AppTextStyles.bodyLg.copyWith(color: Theme.of(context).colorScheme.onSurface)),
                       ),
                     ],
 
@@ -200,7 +200,7 @@ class ContentDetailPage extends ConsumerWidget {
   void _showMenu(BuildContext context, WidgetRef ref) {
     showModalBottomSheet(
       context: context,
-      backgroundColor: AppColors.bgSecondary,
+      backgroundColor: Theme.of(context).cardTheme.color,
       shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
       builder: (_) => SafeArea(
@@ -226,15 +226,15 @@ class ContentDetailPage extends ConsumerWidget {
     final ok = await showDialog<bool>(
       context: context,
       builder: (_) => AlertDialog(
-        backgroundColor: AppColors.bgSecondary,
+        backgroundColor: Theme.of(context).cardTheme.color,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: const Text('Eliminar', style: TextStyle(color: AppColors.textPrimary)),
-        content: const Text('Esta acción no se puede deshacer.',
-            style: TextStyle(color: AppColors.textSecondary)),
+        title: Text('Eliminar', style: TextStyle(color: Theme.of(context).colorScheme.onSurface)),
+        content: Text('Esta acción no se puede deshacer.',
+            style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant)),
         actions: [
           TextButton(
               onPressed: () => Navigator.pop(context, false),
-              child: const Text('Cancelar', style: TextStyle(color: AppColors.textSecondary))),
+              child: Text('Cancelar', style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant))),
           TextButton(
               onPressed: () => Navigator.pop(context, true),
               child: const Text('Eliminar', style: TextStyle(color: Color(0xFFFF6B6B)))),
@@ -259,11 +259,11 @@ class _MetaChip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppColors.border),
+        border: Border.all(color: Theme.of(context).dividerColor),
       ),
-      child: Text(label, style: AppTextStyles.labelMd),
+      child: Text(label, style: AppTextStyles.labelMd.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
     );
   }
 }
@@ -300,7 +300,7 @@ class _StarRating extends StatelessWidget {
     return Row(children: List.generate(5, (i) {
       return Icon(
         i < stars ? Icons.star_rounded : Icons.star_outline_rounded,
-        color: i < stars ? AppColors.cyan : AppColors.textDisabled,
+        color: i < stars ? AppColors.cyan : Theme.of(context).colorScheme.onSurfaceVariant,
         size: 32,
       );
     }));
@@ -315,7 +315,7 @@ class _SectionHeader extends StatelessWidget {
     return Row(children: [
       const Icon(Icons.notes_outlined, size: 18, color: AppColors.cyan),
       const SizedBox(width: 8),
-      Text(title, style: AppTextStyles.titleMd),
+      Text(title, style: AppTextStyles.titleMd.copyWith(color: Theme.of(context).colorScheme.onSurface)),
     ]);
   }
 }

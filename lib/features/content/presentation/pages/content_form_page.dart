@@ -147,10 +147,10 @@ class _ContentFormPageState extends ConsumerState<ContentFormPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.bgPrimary,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         title: Text(
-          widget.id == null ? 'Add New Content' : 'Edit Content',
+          widget.id == null ? 'Añadir contenido' : 'Editar contenido',
           style: AppTextStyles.titleLg,
         ),
         leading: IconButton(
@@ -164,8 +164,8 @@ class _ContentFormPageState extends ConsumerState<ContentFormPage> {
           padding: const EdgeInsets.fromLTRB(20, 8, 20, 40),
           children: [
             // ── Content Type ─────────────────────────────────────────
-            Text('CONTENT TYPE', style: AppTextStyles.labelMd.copyWith(
-                letterSpacing: 1.2, color: AppColors.textDisabled)),
+            Text('TIPO DE CONTENIDO', style: AppTextStyles.labelMd.copyWith(
+                letterSpacing: 1.2, color: Theme.of(context).colorScheme.onSurfaceVariant)),
             const SizedBox(height: 12),
             Wrap(
               spacing: 10,
@@ -179,18 +179,18 @@ class _ContentFormPageState extends ConsumerState<ContentFormPage> {
                     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                     decoration: BoxDecoration(
                       gradient: selected ? AppColors.gradientH : null,
-                      color: selected ? null : AppColors.surface,
+                      color: selected ? null : Theme.of(context).colorScheme.surface,
                       borderRadius: BorderRadius.circular(28),
                       border: Border.all(
-                          color: selected ? Colors.transparent : AppColors.border),
+                          color: selected ? Colors.transparent : Theme.of(context).dividerColor),
                     ),
                     child: Row(mainAxisSize: MainAxisSize.min, children: [
                       Icon(t.icon, size: 16,
-                          color: selected ? Colors.white : AppColors.textSecondary),
+                          color: selected ? Colors.white : Theme.of(context).colorScheme.onSurfaceVariant),
                       const SizedBox(width: 6),
                       Text(t.label,
                           style: AppTextStyles.labelMd.copyWith(
-                              color: selected ? Colors.white : AppColors.textSecondary,
+                              color: selected ? Colors.white : Theme.of(context).colorScheme.onSurfaceVariant,
                               fontWeight: selected ? FontWeight.w600 : FontWeight.w500)),
                     ]),
                   ),
@@ -205,9 +205,9 @@ class _ContentFormPageState extends ConsumerState<ContentFormPage> {
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                 decoration: BoxDecoration(
-                  color: AppColors.surface,
+                  color: Theme.of(context).inputDecorationTheme.fillColor,
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: AppColors.border),
+                  border: Border.all(color: Theme.of(context).dividerColor),
                 ),
                 child: Row(children: [
                   ShaderMask(
@@ -225,8 +225,8 @@ class _ContentFormPageState extends ConsumerState<ContentFormPage> {
                           : 'Buscar en línea...',
                       style: AppTextStyles.bodyMd.copyWith(
                         color: _externalSource != null
-                            ? AppColors.cyan
-                            : AppColors.textDisabled,
+                            ? Theme.of(context).colorScheme.primary
+                            : Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
                     ),
                   ),
@@ -253,34 +253,34 @@ class _ContentFormPageState extends ConsumerState<ContentFormPage> {
             ),
 
             const SizedBox(height: 28),
-            const Divider(color: AppColors.border),
+            Divider(color: Theme.of(context).dividerColor),
             const SizedBox(height: 20),
 
             // ── Manual Entry ─────────────────────────────────────────
-            Text('MANUAL ENTRY', style: AppTextStyles.labelMd.copyWith(
-                letterSpacing: 1.2, color: AppColors.textDisabled)),
+            Text('ENTRADA MANUAL', style: AppTextStyles.labelMd.copyWith(
+                letterSpacing: 1.2, color: Theme.of(context).colorScheme.onSurfaceVariant)),
             const SizedBox(height: 16),
 
-            _FieldLabel('Title'),
+            _FieldLabel('Título'),
             const SizedBox(height: 8),
             TextFormField(
               controller: _titleCtrl,
               style: AppTextStyles.bodyLg,
-              decoration: const InputDecoration(hintText: 'Enter full title'),
+              decoration: const InputDecoration(hintText: 'Introduce el título completo'),
               validator: (v) => (v == null || v.trim().isEmpty) ? 'Campo obligatorio' : null,
             ),
 
             const SizedBox(height: 16),
-            _FieldLabel('Genre'),
+            _FieldLabel('Género'),
             const SizedBox(height: 8),
             TextFormField(
               controller: _genreCtrl,
               style: AppTextStyles.bodyLg,
-              decoration: const InputDecoration(hintText: 'e.g., Sci-Fi, Thriller'),
+              decoration: const InputDecoration(hintText: 'ej. Acción, Aventura'),
             ),
 
             const SizedBox(height: 16),
-            _FieldLabel('Image URL (optional)'),
+            _FieldLabel('URL de imagen (opcional)'),
             const SizedBox(height: 8),
             TextFormField(
               controller: _imageCtrl,
@@ -302,20 +302,20 @@ class _ContentFormPageState extends ConsumerState<ContentFormPage> {
             ),
 
             const SizedBox(height: 16),
-            _FieldLabel('Status'),
+            _FieldLabel('Estado'),
             const SizedBox(height: 8),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               decoration: BoxDecoration(
-                color: AppColors.surface,
+                color: Theme.of(context).inputDecorationTheme.fillColor,
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: AppColors.border),
+                border: Border.all(color: Theme.of(context).dividerColor),
               ),
               child: DropdownButtonHideUnderline(
                 child: DropdownButton<ContentStatus>(
                   value: _status,
-                  dropdownColor: AppColors.bgSecondary,
-                  iconEnabledColor: AppColors.textSecondary,
+                  dropdownColor: Theme.of(context).cardTheme.color,
+                  iconEnabledColor: Theme.of(context).colorScheme.onSurfaceVariant,
                   style: AppTextStyles.bodyLg,
                   isExpanded: true,
                   items: _statuses.map((s) => DropdownMenuItem(
@@ -328,7 +328,7 @@ class _ContentFormPageState extends ConsumerState<ContentFormPage> {
             ),
 
             const SizedBox(height: 20),
-            _FieldLabel('Rating'),
+            _FieldLabel('Puntuación'),
             const SizedBox(height: 10),
             _InteractiveStars(
               value: _score,
@@ -336,19 +336,19 @@ class _ContentFormPageState extends ConsumerState<ContentFormPage> {
             ),
 
             const SizedBox(height: 20),
-            _FieldLabel('Personal Notes'),
+            _FieldLabel('Notas personales'),
             const SizedBox(height: 8),
             TextFormField(
               controller: _notesCtrl,
               maxLines: 5,
               style: AppTextStyles.bodyLg,
               decoration: const InputDecoration(
-                  hintText: 'Add your thoughts, review, or quotes here...'),
+                  hintText: 'Añade tus pensamientos, reseñas o citas aquí...'),
             ),
 
             const SizedBox(height: 32),
             GradientButton(
-              label: 'Save Content',
+              label: 'Guardar contenido',
               loading: _loading,
               onPressed: _loading ? null : _save,
             ),
@@ -366,7 +366,7 @@ class _FieldLabel extends StatelessWidget {
   const _FieldLabel(this.text);
   @override
   Widget build(BuildContext context) =>
-      Text(text, style: AppTextStyles.bodyMd.copyWith(color: AppColors.textPrimary));
+      Text(text, style: AppTextStyles.bodyMd.copyWith(color: Theme.of(context).colorScheme.onSurface));
 }
 
 class _InteractiveStars extends StatelessWidget {

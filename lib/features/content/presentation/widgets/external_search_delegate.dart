@@ -28,7 +28,7 @@ Future<ExternalSearchResult?> showExternalSearchSheet({
   return showModalBottomSheet<ExternalSearchResult>(
     context: context,
     isScrollControlled: true,
-    backgroundColor: AppColors.bgSecondary,
+    backgroundColor: Theme.of(context).cardTheme.color,
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
     ),
@@ -101,7 +101,7 @@ class _ExternalSearchSheetState extends ConsumerState<_ExternalSearchSheet> {
           width: 40,
           height: 4,
           decoration: BoxDecoration(
-            color: AppColors.textDisabled,
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
             borderRadius: BorderRadius.circular(2),
           ),
         ),
@@ -122,12 +122,12 @@ class _ExternalSearchSheetState extends ConsumerState<_ExternalSearchSheet> {
                 child: Container(
                   padding: const EdgeInsets.all(6),
                   decoration: BoxDecoration(
-                    color: AppColors.surface,
+                    color: Theme.of(context).colorScheme.surface,
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  child: const Icon(
+                  child: Icon(
                     Icons.close,
-                    color: AppColors.textSecondary,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
                     size: 18,
                   ),
                 ),
@@ -147,9 +147,9 @@ class _ExternalSearchSheetState extends ConsumerState<_ExternalSearchSheet> {
             onChanged: _onQueryChanged,
             decoration: InputDecoration(
               hintText: 'Título de ${widget.type.label.toLowerCase()}...',
-              prefixIcon: const Icon(
+              prefixIcon: Icon(
                 Icons.search,
-                color: AppColors.textDisabled,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
                 size: 20,
               ),
               suffixIcon: _ctrl.text.isNotEmpty
@@ -158,30 +158,30 @@ class _ExternalSearchSheetState extends ConsumerState<_ExternalSearchSheet> {
                         _ctrl.clear();
                         _onQueryChanged('');
                       },
-                      child: const Icon(
+                      child: Icon(
                         Icons.clear,
-                        color: AppColors.textDisabled,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
                         size: 18,
                       ),
                     )
                   : null,
               filled: true,
-              fillColor: AppColors.surface,
+              fillColor: Theme.of(context).colorScheme.surface,
               contentPadding: const EdgeInsets.symmetric(
                 horizontal: 16,
                 vertical: 14,
               ),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(14),
-                borderSide: BorderSide(color: AppColors.border),
+                borderSide: BorderSide(color: Theme.of(context).dividerColor),
               ),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(14),
-                borderSide: BorderSide(color: AppColors.border),
+                borderSide: BorderSide(color: Theme.of(context).dividerColor),
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(14),
-                borderSide: BorderSide(color: AppColors.cyan, width: 1.5),
+                borderSide: BorderSide(color: Theme.of(context).colorScheme.primary, width: 1.5),
               ),
             ),
           ),
@@ -235,10 +235,10 @@ class _ResultsList extends ConsumerWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(
+              Icon(
                 Icons.cloud_off_outlined,
                 size: 48,
-                color: AppColors.textDisabled,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
               const SizedBox(height: 16),
               Text(
@@ -263,10 +263,10 @@ class _ResultsList extends ConsumerWidget {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Icon(
+                  Icon(
                     Icons.search_off_outlined,
                     size: 48,
-                    color: AppColors.textDisabled,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
                   const SizedBox(height: 16),
                   Text('Sin resultados', style: AppTextStyles.titleMd),
@@ -311,9 +311,9 @@ class _ResultTile extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(10),
         decoration: BoxDecoration(
-          color: AppColors.surface,
+          color: Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: AppColors.border),
+          border: Border.all(color: Theme.of(context).dividerColor),
         ),
         child: Row(
           children: [
@@ -355,7 +355,7 @@ class _ResultTile extends StatelessWidget {
                     Text(
                       result.subtitle!,
                       style: AppTextStyles.labelMd.copyWith(
-                        color: AppColors.textSecondary,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -422,8 +422,8 @@ class _ThumbPlaceholder extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: AppColors.bgSecondary,
-      child: Center(child: Icon(icon, size: 22, color: AppColors.textDisabled)),
+      color: Theme.of(context).cardTheme.color,
+      child: Center(child: Icon(icon, size: 22, color: Theme.of(context).colorScheme.onSurfaceVariant)),
     );
   }
 }

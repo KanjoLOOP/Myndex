@@ -137,4 +137,138 @@ class AppTheme {
       ),
     );
   }
+
+  static ThemeData light() {
+    const colorScheme = ColorScheme(
+      brightness: Brightness.light,
+      primary:           AppColors.blue, // Usamos azul en lugar de cyan para mejor contraste en modo claro
+      onPrimary:         AppColors.bgPrimaryLight,
+      primaryContainer:  AppColors.surfaceLight,
+      onPrimaryContainer: AppColors.blue,
+      secondary:         AppColors.cyan,
+      onSecondary:       AppColors.textPrimaryLight,
+      secondaryContainer: AppColors.surfaceHighLight,
+      onSecondaryContainer: AppColors.textPrimaryLight,
+      tertiary:          AppColors.purple,
+      onTertiary:        AppColors.textPrimaryLight,
+      tertiaryContainer: AppColors.surfaceLight,
+      onTertiaryContainer: AppColors.purple,
+      error:             Color(0xFFE53E3E),
+      onError:           AppColors.bgPrimaryLight,
+      errorContainer:    Color(0xFFFED7D7),
+      onErrorContainer:  Color(0xFFE53E3E),
+      surface:           AppColors.bgPrimaryLight,
+      onSurface:         AppColors.textPrimaryLight,
+      onSurfaceVariant:  AppColors.textSecondaryLight,
+      outline:           AppColors.borderLight,
+      outlineVariant:    AppColors.surfaceLight,
+      shadow:            Colors.black12,
+      scrim:             Colors.black54,
+      inverseSurface:    AppColors.textPrimaryLight,
+      onInverseSurface:  AppColors.bgPrimaryLight,
+      inversePrimary:    AppColors.blue,
+      surfaceTint:       AppColors.blue,
+    );
+
+    return ThemeData(
+      useMaterial3: true,
+      colorScheme: colorScheme,
+      scaffoldBackgroundColor: AppColors.bgPrimaryLight,
+      // AppBar
+      appBarTheme: AppBarTheme(
+        backgroundColor: AppColors.bgPrimaryLight,
+        foregroundColor: AppColors.textPrimaryLight,
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        systemOverlayStyle: SystemUiOverlayStyle.dark.copyWith(
+          statusBarColor: Colors.transparent,
+        ),
+        titleTextStyle: AppTextStyles.titleLg.copyWith(color: AppColors.textPrimaryLight),
+        iconTheme: const IconThemeData(color: AppColors.textPrimaryLight),
+      ),
+      // Cards
+      cardTheme: CardThemeData(
+        color: AppColors.bgSecondaryLight,
+        elevation: 0,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+          side: const BorderSide(color: AppColors.borderLight, width: 1),
+        ),
+        margin: EdgeInsets.zero,
+      ),
+      // BottomNav
+      navigationBarTheme: NavigationBarThemeData(
+        backgroundColor: AppColors.bgSecondaryLight,
+        indicatorColor: AppColors.blue.withValues(alpha: 0.15),
+        iconTheme: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
+            return const IconThemeData(color: AppColors.blue, size: 24);
+          }
+          return const IconThemeData(color: AppColors.textDisabledLight, size: 24);
+        }),
+        labelTextStyle: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
+            return AppTextStyles.labelMd.copyWith(color: AppColors.blue);
+          }
+          return AppTextStyles.labelMd.copyWith(color: AppColors.textDisabledLight);
+        }),
+        elevation: 0,
+        height: 72,
+      ),
+      // Inputs
+      inputDecorationTheme: InputDecorationTheme(
+        filled: true,
+        fillColor: AppColors.surfaceLight,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: AppColors.borderLight),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: AppColors.borderLight),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: AppColors.blue, width: 1.5),
+        ),
+        hintStyle: AppTextStyles.bodyMd.copyWith(color: AppColors.textDisabledLight),
+        labelStyle: AppTextStyles.bodyMd.copyWith(color: AppColors.textSecondaryLight),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      ),
+      // Chips
+      chipTheme: ChipThemeData(
+        backgroundColor: AppColors.surfaceLight,
+        selectedColor: AppColors.blue.withValues(alpha: 0.15),
+        labelStyle: AppTextStyles.labelMd.copyWith(color: AppColors.textSecondaryLight),
+        side: const BorderSide(color: AppColors.borderLight),
+        shape: const StadiumBorder(),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      ),
+      // Dividers
+      dividerTheme: const DividerThemeData(
+        color: AppColors.borderLight,
+        thickness: 1,
+        space: 1,
+      ),
+      // Text
+      textTheme: TextTheme(
+        displayLarge:  AppTextStyles.displayLg.copyWith(color: AppColors.textPrimaryLight),
+        headlineLarge: AppTextStyles.headlineLg.copyWith(color: AppColors.textPrimaryLight),
+        headlineMedium: AppTextStyles.headlineMd.copyWith(color: AppColors.textPrimaryLight),
+        titleLarge:    AppTextStyles.titleLg.copyWith(color: AppColors.textPrimaryLight),
+        titleMedium:   AppTextStyles.titleMd.copyWith(color: AppColors.textPrimaryLight),
+        bodyLarge:     AppTextStyles.bodyLg.copyWith(color: AppColors.textPrimaryLight),
+        bodyMedium:    AppTextStyles.bodyMd.copyWith(color: AppColors.textPrimaryLight),
+        labelMedium:   AppTextStyles.labelMd.copyWith(color: AppColors.textSecondaryLight),
+        labelSmall:    AppTextStyles.labelSm.copyWith(color: AppColors.textSecondaryLight),
+      ),
+      // List tiles
+      listTileTheme: const ListTileThemeData(
+        tileColor: Colors.transparent,
+        textColor: AppColors.textPrimaryLight,
+        iconColor: AppColors.textSecondaryLight,
+        contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+      ),
+    );
+  }
 }

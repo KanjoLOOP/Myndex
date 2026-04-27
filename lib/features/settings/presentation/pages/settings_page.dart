@@ -8,6 +8,7 @@ import '../../../../core/security/safe_error_message.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/widgets/gradient_text.dart';
+import '../../../../core/theme/theme_provider.dart';
 import '../../../backup/presentation/providers/backup_providers.dart';
 import '../../../content/presentation/providers/content_providers.dart';
 
@@ -22,66 +23,66 @@ class SettingsPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
-      backgroundColor: AppColors.bgPrimary,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: AppColors.bgPrimary,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         titleSpacing: 20,
-        title: const Text('Settings', style: AppTextStyles.titleLg),
+        title: const Text('Ajustes', style: AppTextStyles.titleLg),
       ),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 40),
         children: [
           // ── Gestión de datos ──────────────────────────────────────
-          _SectionHeader('Data Management'),
+          _SectionHeader('Gestión de datos'),
           const SizedBox(height: 10),
           _SettingsGroup(children: [
             _SettingsTile(
               icon: Icons.upload_outlined,
               iconColor: AppColors.cyan,
-              title: 'Export Library (JSON)',
+              title: 'Exportar biblioteca (JSON)',
               onTap: () => _export(context, ref),
             ),
-            const Divider(color: AppColors.border, height: 1),
+            Divider(color: Theme.of(context).dividerColor, height: 1),
             _SettingsTile(
               icon: Icons.download_outlined,
               iconColor: AppColors.cyan,
-              title: 'Import Library (JSON)',
+              title: 'Importar biblioteca (JSON)',
               onTap: () => _import(context, ref),
             ),
           ]),
 
           const SizedBox(height: 24),
           // ── Apariencia ────────────────────────────────────────────
-          _SectionHeader('Appearance'),
+          _SectionHeader('Apariencia'),
           const SizedBox(height: 10),
           _SettingsGroup(children: [
             _SettingsTile(
               icon: Icons.dark_mode_outlined,
               iconColor: AppColors.cyan,
-              title: 'Dark Mode',
+              title: 'Modo oscuro',
               trailing: Switch(
-                value: true,
-                onChanged: (_) {},
+                value: ref.watch(themeProvider) == ThemeMode.dark,
+                onChanged: (_) => ref.read(themeProvider.notifier).toggleTheme(),
                 activeColor: AppColors.cyan,
                 activeTrackColor: AppColors.blue.withOpacity(0.4),
               ),
             ),
-            const Divider(color: AppColors.border, height: 1),
+            Divider(color: Theme.of(context).dividerColor, height: 1),
             _SettingsTile(
               icon: Icons.palette_outlined,
               iconColor: AppColors.cyan,
-              title: 'Theme Color',
+              title: 'Color del tema',
               trailing: Row(mainAxisSize: MainAxisSize.min, children: [
                 ShaderMask(
                   blendMode: BlendMode.srcIn,
                   shaderCallback: (b) => AppColors.gradientH.createShader(
                       Rect.fromLTWH(0, 0, b.width, b.height)),
-                  child: const Text('Neon Gradient',
+                  child: const Text('Gradiente Neón',
                       style: AppTextStyles.bodyMd),
                 ),
                 const SizedBox(width: 6),
-                const Icon(Icons.chevron_right,
-                    color: AppColors.textDisabled, size: 18),
+                Icon(Icons.chevron_right,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant, size: 18),
               ]),
             ),
           ]),
@@ -94,14 +95,14 @@ class SettingsPage extends ConsumerWidget {
             _SettingsTile(
               icon: Icons.help_outline,
               iconColor: AppColors.cyan,
-              title: 'Help & Support',
+              title: 'Ayuda y soporte',
               onTap: () {},
             ),
-            const Divider(color: AppColors.border, height: 1),
+            Divider(color: Theme.of(context).dividerColor, height: 1),
             _SettingsTile(
               icon: Icons.info_outline,
               iconColor: AppColors.cyan,
-              title: 'About Myndex',
+              title: 'Acerca de Myndex',
               onTap: () => _showAbout(context),
             ),
           ]),
@@ -131,7 +132,7 @@ class SettingsPage extends ConsumerWidget {
       if (!context.mounted) return;
       await Share.shareXFiles(
         [XFile(path)],
-        text: 'Myndex backup',
+        text: 'Copia de seguridad Myndex',
       );
     } catch (e) {
       if (!context.mounted) return;
@@ -179,7 +180,7 @@ class SettingsPage extends ConsumerWidget {
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
-        backgroundColor: AppColors.bgSecondary,
+        backgroundColor: Theme.of(context).cardTheme.color,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         title: GradientText('Myndex', style: AppTextStyles.headlineMd),
         content: Text(
@@ -215,9 +216,9 @@ class _SettingsGroup extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.bgSecondary,
+        color: Theme.of(context).cardTheme.color,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.border),
+        border: Border.all(color: Theme.of(context).dividerColor),
       ),
       child: Column(children: children),
     );
@@ -252,10 +253,10 @@ class _SettingsTile extends StatelessWidget {
         ),
         child: Icon(icon, color: iconColor, size: 18),
       ),
-      title: Text(title, style: AppTextStyles.bodyLg),
+      title: Text(title, style: AppTextStyles.bodyLg.copyWith(color: Theme.of(context).colorScheme.onSurface)),
       trailing: trailing ??
           (onTap != null
-              ? const Icon(Icons.chevron_right, color: AppColors.textDisabled)
+              ? Icon(Icons.chevron_right, color: Theme.of(context).colorScheme.onSurfaceVariant)
               : null),
     );
   }

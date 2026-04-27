@@ -59,7 +59,13 @@ class AppDatabase extends _$AppDatabase {
   /// `drift_flutter` resuelve la ruta al directorio privado de la
   /// app para SQLite y configura el aislado de fondo automáticamente.
   static QueryExecutor _openConnection() {
-    return driftDatabase(name: AppConstants.dbName);
+    return driftDatabase(
+      name: AppConstants.dbName,
+      web: DriftWebOptions(
+        sqlite3Wasm: Uri.parse('sqlite3.wasm'),
+        driftWorker: Uri.parse('drift_worker.js'),
+      ),
+    );
   }
 }
 
