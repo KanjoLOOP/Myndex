@@ -28,6 +28,7 @@ extension ContentItemRowMapper on db.ContentItem {
                 .firstOrNull ??
             ContentStatus.pending,
         score: score,
+        genre: genre,
         notes: notes,
         imageUrl: imageUrl,
         externalId: externalId,
@@ -48,6 +49,7 @@ extension ContentItemEntityMapper on ContentItem {
         type: type.name,
         status: status.name,
         score: Value(score),
+        genre: Value(genre),
         notes: Value(notes),
         imageUrl: Value(imageUrl),
         externalId: Value(externalId),
@@ -69,6 +71,7 @@ extension ContentItemEntityMapper on ContentItem {
         type: Value(type.name),
         status: Value(status.name),
         score: Value(score),
+        genre: Value(genre),
         notes: Value(notes),
         imageUrl: Value(imageUrl),
         externalId: Value(externalId),

@@ -36,6 +36,7 @@ class ContentItems extends Table {
   RealColumn get score => real().nullable()();
   TextColumn get notes => text().nullable()();
   TextColumn get imageUrl => text().nullable()();
+  TextColumn get genre => text().nullable()();            // género(s) libre, ej. "Acción, Aventura"
   TextColumn get externalId => text().nullable()();      // id de TMDB/RAWG/etc.
   TextColumn get externalSource => text().nullable()();  // 'tmdb','rawg','openlibrary'
   DateTimeColumn get addedAt => dateTime().withDefault(currentDateAndTime)();
@@ -53,6 +54,15 @@ class AppDatabase extends _$AppDatabase {
 
   @override
   int get schemaVersion => AppConstants.dbVersion;
+
+  @override
+  MigrationStrategy get migration => MigrationStrategy(
+    onUpgrade: (migrator, from, to) async {
+      if (from < 2) {
+        await migrator.addColumn(contentItems, contentItems.genre);
+      }
+    },
+  );
 
   /// Conexión por defecto.
   ///
