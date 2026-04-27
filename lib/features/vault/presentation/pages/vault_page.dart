@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/security/input_sanitizer.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/widgets/gradient_text.dart';
@@ -80,7 +81,7 @@ class _HistorialTab extends ConsumerWidget {
     return async.when(
       loading: () =>
           const Center(child: CircularProgressIndicator(color: AppColors.cyan)),
-      error: (e, _) => Center(child: Text('Error: $e')),
+      error: (e, _) => const Center(child: Text('Error al cargar los datos')),
       data: (items) => items.isEmpty
           ? _EmptyVault(
               icon: Icons.history,
@@ -103,7 +104,7 @@ class _FavoritosTab extends ConsumerWidget {
     return async.when(
       loading: () =>
           const Center(child: CircularProgressIndicator(color: AppColors.cyan)),
-      error: (e, _) => Center(child: Text('Error: $e')),
+      error: (e, _) => const Center(child: Text('Error al cargar los datos')),
       data: (items) => items.isEmpty
           ? _EmptyVault(
               icon: Icons.favorite_border,
@@ -169,7 +170,12 @@ class _ColeccionesTabState extends ConsumerState<_ColeccionesTab> {
       ),
     );
     if (name != null && name.isNotEmpty) {
-      await ref.read(createCollectionProvider)(name);
+      try {
+        final sanitized = InputSanitizer.sanitizeTitle(name);
+        await ref.read(createCollectionProvider)(sanitized);
+      } on FormatException {
+        // Nombre vacío tras sanitizar — ignorar
+      }
     }
   }
 
@@ -215,7 +221,7 @@ class _ColeccionesTabState extends ConsumerState<_ColeccionesTab> {
       body: async.when(
         loading: () => const Center(
             child: CircularProgressIndicator(color: AppColors.cyan)),
-        error: (e, _) => Center(child: Text('Error: $e')),
+        error: (e, _) => const Center(child: Text('Error al cargar los datos')),
         data: (collections) => collections.isEmpty
             ? _EmptyVault(
                 icon: Icons.collections_bookmark_outlined,

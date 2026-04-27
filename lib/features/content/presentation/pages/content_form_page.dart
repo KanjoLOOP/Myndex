@@ -295,7 +295,8 @@ class _ContentFormPageState extends ConsumerState<ContentFormPage> {
                 final uri = Uri.tryParse(v.trim());
                 if (uri == null ||
                     (uri.scheme != 'http' && uri.scheme != 'https') ||
-                    !uri.hasAuthority) {
+                    !uri.hasAuthority ||
+                    uri.host.isEmpty) {
                   return 'Solo se admiten URLs http/https';
                 }
                 return null;

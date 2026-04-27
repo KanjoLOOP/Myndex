@@ -36,7 +36,7 @@ class CollectionDetailPage extends ConsumerWidget {
       body: asyncItems.when(
         loading: () =>
             const Center(child: CircularProgressIndicator(color: AppColors.cyan)),
-        error: (e, _) => Center(child: Text('Error: $e')),
+        error: (e, _) => const Center(child: Text('No se pudo cargar la colección')),
         data: (items) => items.isEmpty
             ? Center(
                 child: Column(mainAxisSize: MainAxisSize.min, children: [

@@ -64,6 +64,7 @@ final deleteCollectionProvider =
   return (id) async {
     await ds.delete(id);
     ref.invalidate(collectionsProvider);
+    ref.invalidate(collectionItemsProvider(id));
   };
 });
 

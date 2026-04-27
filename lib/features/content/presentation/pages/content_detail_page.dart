@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/constants/content_types.dart';
+import '../../../../core/security/input_sanitizer.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/widgets/gradient_button.dart';
@@ -39,7 +40,7 @@ class ContentDetailPage extends ConsumerWidget {
       ),
       error: (e, _) => Scaffold(
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-        body: Center(child: Text('Error: $e')),
+        body: const Center(child: Text('No se pudo cargar el contenido')),
       ),
       data: (item) {
         if (item == null) {
@@ -350,8 +351,14 @@ class _CollectionPickerSheetState
   }
 
   Future<void> _createAndAdd() async {
-    final name = _nameCtrl.text.trim();
-    if (name.isEmpty) return;
+    final raw = _nameCtrl.text.trim();
+    if (raw.isEmpty) return;
+    final String name;
+    try {
+      name = InputSanitizer.sanitizeTitle(raw);
+    } on FormatException {
+      return;
+    }
     final col = await ref.read(createCollectionProvider)(name);
     if (col.id != null) {
       await ref.read(toggleItemInCollectionProvider)(
@@ -422,7 +429,7 @@ class _CollectionPickerSheetState
           asyncCollections.when(
             loading: () =>
                 const Center(child: CircularProgressIndicator()),
-            error: (e, _) => Text('Error: $e'),
+            error: (e, _) => const Text('No se pudieron cargar las colecciones'),
             data: (collections) {
               if (collections.isEmpty) {
                 return Padding(

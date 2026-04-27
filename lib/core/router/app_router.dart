@@ -26,8 +26,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: '/content/:id',
-        builder: (context, state) =>
-            ContentDetailPage(id: int.parse(state.pathParameters['id']!)),
+        builder: (context, state) {
+          final id = int.tryParse(state.pathParameters['id'] ?? '');
+          if (id == null) return const _NotFoundPage();
+          return ContentDetailPage(id: id);
+        },
       ),
       GoRoute(
         path: '/content/new',
@@ -35,13 +38,19 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: '/content/:id/edit',
-        builder: (context, state) =>
-            ContentFormPage(id: int.parse(state.pathParameters['id']!)),
+        builder: (context, state) {
+          final id = int.tryParse(state.pathParameters['id'] ?? '');
+          if (id == null) return const _NotFoundPage();
+          return ContentFormPage(id: id);
+        },
       ),
       GoRoute(
         path: '/vault/collection/:id',
-        builder: (context, state) => CollectionDetailPage(
-            collectionId: int.parse(state.pathParameters['id']!)),
+        builder: (context, state) {
+          final id = int.tryParse(state.pathParameters['id'] ?? '');
+          if (id == null) return const _NotFoundPage();
+          return CollectionDetailPage(collectionId: id);
+        },
       ),
       GoRoute(
         path: '/stats',
@@ -50,6 +59,16 @@ final appRouterProvider = Provider<GoRouter>((ref) {
     ],
   );
 });
+
+// ── 404 ───────────────────────────────────────────────────────────────────
+class _NotFoundPage extends StatelessWidget {
+  const _NotFoundPage();
+  @override
+  Widget build(BuildContext context) => Scaffold(
+        appBar: AppBar(),
+        body: const Center(child: Text('Página no encontrada')),
+      );
+}
 
 // ── Shell con NavigationBar ────────────────────────────────────────────────
 class _ScaffoldWithNav extends StatefulWidget {

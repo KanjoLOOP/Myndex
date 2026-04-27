@@ -28,7 +28,7 @@ class StatsPage extends ConsumerWidget {
       body: async.when(
         loading: () => const Center(
             child: CircularProgressIndicator(color: AppColors.cyan)),
-        error: (e, _) => Center(child: Text('Error: $e')),
+        error: (e, _) => const Center(child: Text('No se pudieron cargar las estadísticas')),
         data: (stats) => stats.total == 0
             ? _EmptyStats()
             : _StatsBody(stats: stats),
