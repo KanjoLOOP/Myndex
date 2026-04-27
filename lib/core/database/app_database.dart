@@ -1,5 +1,4 @@
 import 'package:drift/drift.dart';
-import 'package:drift_flutter/drift_flutter.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../constants/app_constants.dart';
@@ -64,7 +63,7 @@ class CollectionItems extends Table {
 
 @DriftDatabase(tables: [ContentItems, Collections, CollectionItems])
 class AppDatabase extends _$AppDatabase {
-  AppDatabase() : super(_openConnection());
+  AppDatabase(super.executor);
 
   /// Constructor inyectable para tests (DB en memoria).
   AppDatabase.forTesting(super.executor);
@@ -85,20 +84,6 @@ class AppDatabase extends _$AppDatabase {
       }
     },
   );
-
-  /// Conexión por defecto.
-  ///
-  /// `drift_flutter` resuelve la ruta al directorio privado de la
-  /// app para SQLite y configura el aislado de fondo automáticamente.
-  static QueryExecutor _openConnection() {
-    return driftDatabase(
-      name: AppConstants.dbName,
-      web: DriftWebOptions(
-        sqlite3Wasm: Uri.parse('sqlite3.wasm'),
-        driftWorker: Uri.parse('drift_worker.js'),
-      ),
-    );
-  }
 }
 
 // ─── Provider ─────────────────────────────────────────────────────

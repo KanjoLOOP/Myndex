@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/constants/content_types.dart';
 import '../../../../core/database/app_database.dart' show databaseProvider;
 import '../../../content/domain/entities/content_item.dart';
 import '../../../content/presentation/providers/content_providers.dart';

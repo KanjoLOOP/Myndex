@@ -67,7 +67,7 @@ class InputSanitizer {
     if (uri == null) return null;
     // Solo se permiten esquemas seguros y resolubles a través de la red.
     if (uri.scheme != 'http' && uri.scheme != 'https') return null;
-    if (!uri.hasAuthority) return null;
+    if (!uri.hasAuthority || uri.host.isEmpty) return null;
     return trimmed;
   }
 

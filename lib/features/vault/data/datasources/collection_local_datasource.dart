@@ -1,6 +1,6 @@
 import 'package:drift/drift.dart';
 
-import '../../../../core/database/app_database.dart' hide Collection;
+import '../../../../core/database/app_database.dart' hide Collection, ContentItem;
 import '../../../../core/database/app_database.dart' as db show Collection;
 import '../../../../features/content/data/models/content_item_model.dart';
 import '../../../../features/content/domain/entities/content_item.dart';
