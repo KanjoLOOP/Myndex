@@ -65,7 +65,7 @@ class AppTheme {
       // BottomNav
       navigationBarTheme: NavigationBarThemeData(
         backgroundColor: AppColors.bgSecondary,
-        indicatorColor: AppColors.blue.withOpacity(0.2),
+        indicatorColor: AppColors.blue.withValues(alpha: 0.2),
         iconTheme: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.selected)) {
             return const IconThemeData(color: AppColors.cyan, size: 24);
@@ -104,7 +104,7 @@ class AppTheme {
       // Chips
       chipTheme: ChipThemeData(
         backgroundColor: AppColors.surface,
-        selectedColor: AppColors.blue.withOpacity(0.25),
+        selectedColor: AppColors.blue.withValues(alpha: 0.25),
         labelStyle: AppTextStyles.labelMd.copyWith(color: AppColors.textSecondary),
         side: const BorderSide(color: AppColors.border),
         shape: const StadiumBorder(),
@@ -117,7 +117,7 @@ class AppTheme {
         space: 1,
       ),
       // Text
-      textTheme: TextTheme(
+      textTheme: const TextTheme(
         displayLarge:  AppTextStyles.displayLg,
         headlineLarge: AppTextStyles.headlineLg,
         headlineMedium: AppTextStyles.headlineMd,

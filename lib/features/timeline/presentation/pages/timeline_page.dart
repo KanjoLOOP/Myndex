@@ -22,7 +22,7 @@ class TimelinePage extends ConsumerWidget {
               color: Theme.of(context).colorScheme.onSurface),
           onPressed: () => context.pop(),
         ),
-        title: Text('Mi Timeline', style: AppTextStyles.titleLg),
+        title: const Text('Mi Timeline', style: AppTextStyles.titleLg),
       ),
       body: asyncLog.when(
         loading: () => const Center(
@@ -141,9 +141,9 @@ class _TimelineEntry extends StatelessWidget {
               width: 28,
               height: 28,
               decoration: BoxDecoration(
-                color: color.withOpacity(0.15),
+                color: color.withValues(alpha: 0.15),
                 shape: BoxShape.circle,
-                border: Border.all(color: color.withOpacity(0.5)),
+                border: Border.all(color: color.withValues(alpha: 0.5)),
               ),
               child: Icon(icon, size: 14, color: color),
             ),

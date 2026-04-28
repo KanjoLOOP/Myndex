@@ -83,7 +83,7 @@ class _HistorialTab extends ConsumerWidget {
           const Center(child: CircularProgressIndicator(color: AppColors.cyan)),
       error: (e, _) => const Center(child: Text('Error al cargar los datos')),
       data: (items) => items.isEmpty
-          ? _EmptyVault(
+          ? const _EmptyVault(
               icon: Icons.history,
               title: 'Sin historial',
               subtitle: 'Marca contenido como Completado para verlo aquí',
@@ -106,7 +106,7 @@ class _FavoritosTab extends ConsumerWidget {
           const Center(child: CircularProgressIndicator(color: AppColors.cyan)),
       error: (e, _) => const Center(child: Text('Error al cargar los datos')),
       data: (items) => items.isEmpty
-          ? _EmptyVault(
+          ? const _EmptyVault(
               icon: Icons.favorite_border,
               title: 'Sin favoritos',
               subtitle:
@@ -223,7 +223,7 @@ class _ColeccionesTabState extends ConsumerState<_ColeccionesTab> {
             child: CircularProgressIndicator(color: AppColors.cyan)),
         error: (e, _) => const Center(child: Text('Error al cargar los datos')),
         data: (collections) => collections.isEmpty
-            ? _EmptyVault(
+            ? const _EmptyVault(
                 icon: Icons.collections_bookmark_outlined,
                 title: 'Sin colecciones',
                 subtitle:
@@ -300,7 +300,7 @@ class _ColeccionesTabState extends ConsumerState<_ColeccionesTab> {
             borderRadius: BorderRadius.circular(16),
             boxShadow: [
               BoxShadow(
-                color: AppColors.blue.withOpacity(0.4),
+                color: AppColors.blue.withValues(alpha: 0.4),
                 blurRadius: 16,
                 offset: const Offset(0, 6),
               ),

@@ -241,12 +241,12 @@ class _ResultsList extends ConsumerWidget {
                 color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
               const SizedBox(height: 16),
-              Text(
+              const Text(
                 'No se pudo buscar',
                 style: AppTextStyles.titleMd,
               ),
               const SizedBox(height: 8),
-              Text(
+              const Text(
                 'Comprueba tu conexión a internet',
                 style: AppTextStyles.bodyMd,
                 textAlign: TextAlign.center,
@@ -269,9 +269,9 @@ class _ResultsList extends ConsumerWidget {
                     color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
                   const SizedBox(height: 16),
-                  Text('Sin resultados', style: AppTextStyles.titleMd),
+                  const Text('Sin resultados', style: AppTextStyles.titleMd),
                   const SizedBox(height: 8),
-                  Text(
+                  const Text(
                     'Prueba con otro título',
                     style: AppTextStyles.bodyMd,
                   ),
@@ -453,7 +453,7 @@ class _EmptyHint extends StatelessWidget {
               style: AppTextStyles.titleMd,
             ),
             const SizedBox(height: 8),
-            Text(
+            const Text(
               'Escribe un título para encontrar portadas,\naños y más información automáticamente',
               style: AppTextStyles.bodyMd,
               textAlign: TextAlign.center,

@@ -27,7 +27,7 @@ class LibraryStats {
     required this.topRated,
   });
 
-  factory LibraryStats.empty() => LibraryStats(
+  factory LibraryStats.empty() => const LibraryStats(
         total: 0,
         favorites: 0,
         averageScore: null,

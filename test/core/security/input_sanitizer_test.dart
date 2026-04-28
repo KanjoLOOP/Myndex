@@ -56,7 +56,7 @@ void main() {
     });
 
     test('strip null bytes and control chars (except \\t \\n \\r)', () {
-      final withControl = 'hello\x00world\x07end';
+      const withControl = 'hello\x00world\x07end';
       final result = InputSanitizer.sanitizeNotes(withControl);
       expect(result, 'helloworld\x07'.contains('\x07') ? isNotNull : 'helloworld end');
       expect(result, isNotNull);
@@ -106,7 +106,7 @@ void main() {
     });
 
     test('return null for URL exceeding maxUrlLength', () {
-      final long = 'https://example.com/' + 'a' * InputSanitizer.maxUrlLength;
+      final long = 'https://example.com/${'a' * InputSanitizer.maxUrlLength}';
       expect(InputSanitizer.sanitizeImageUrl(long), isNull);
     });
 

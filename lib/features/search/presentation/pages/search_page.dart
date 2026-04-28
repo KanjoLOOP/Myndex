@@ -122,12 +122,12 @@ class _SearchPageState extends ConsumerState<SearchPage> {
       );
     }
     if (_results.isEmpty && _ctrl.text.isNotEmpty) {
-      return Center(
+      return const Center(
         child: Text('Sin resultados', style: AppTextStyles.bodyMd),
       );
     }
     if (_results.isEmpty) {
-      return Center(
+      return const Center(
         child: Text(
           'Empieza a escribir para buscar en tu biblioteca',
           style: AppTextStyles.bodyMd,

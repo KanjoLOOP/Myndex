@@ -41,7 +41,7 @@ class _SmartBacklogPageState extends ConsumerState<SmartBacklogPage> {
               color: Theme.of(context).colorScheme.onSurface),
           onPressed: () => context.pop(),
         ),
-        title: Text('Smart Backlog', style: AppTextStyles.titleLg),
+        title: const Text('Smart Backlog', style: AppTextStyles.titleLg),
       ),
       body: asyncItems.when(
         loading: () =>
@@ -192,7 +192,9 @@ class _SmartBacklogPageState extends ConsumerState<SmartBacklogPage> {
     return items.where((item) {
       // Only pending or in-progress items
       if (item.status == ContentStatus.completed ||
-          item.status == ContentStatus.dropped) return false;
+          item.status == ContentStatus.dropped) {
+        return false;
+      }
       // Type filter
       if (_filterType != null && item.type != _filterType) return false;
       // Duration filter: if item has estimated duration, use it

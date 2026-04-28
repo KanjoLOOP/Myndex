@@ -416,7 +416,7 @@ class _FilterPanelState extends State<_FilterPanel> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // ── Tipo ──────────────────────────────────────────────
-                  _SectionLabel('Tipo de contenido'),
+                  const _SectionLabel('Tipo de contenido'),
                   const SizedBox(height: 10),
                   Wrap(
                     spacing: 8,
@@ -430,7 +430,7 @@ class _FilterPanelState extends State<_FilterPanel> {
                   const SizedBox(height: 24),
 
                   // ── Estado ────────────────────────────────────────────
-                  _SectionLabel('Estado'),
+                  const _SectionLabel('Estado'),
                   const SizedBox(height: 10),
                   Wrap(
                     spacing: 8,
@@ -444,7 +444,7 @@ class _FilterPanelState extends State<_FilterPanel> {
                   const SizedBox(height: 24),
 
                   // ── Puntuación ────────────────────────────────────────
-                  _SectionLabel('Puntuación mínima'),
+                  const _SectionLabel('Puntuación mínima'),
                   const SizedBox(height: 10),
                   Wrap(
                     spacing: 8,

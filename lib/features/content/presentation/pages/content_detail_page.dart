@@ -137,7 +137,7 @@ class ContentDetailPage extends ConsumerWidget {
                                 Colors.transparent,
                                 Theme.of(context)
                                     .scaffoldBackgroundColor
-                                    .withOpacity(0.8),
+                                    .withValues(alpha: 0.8),
                                 Theme.of(context).scaffoldBackgroundColor,
                               ],
                               stops: const [0.5, 0.85, 1.0],
@@ -349,9 +349,10 @@ class ContentDetailPage extends ConsumerWidget {
       ),
     );
     if (ok == true && context.mounted) {
+      final router = GoRouter.of(context);
       await ref.read(deleteContentProvider).call(id);
       ref.invalidate(contentListProvider);
-      context.pop();
+      router.pop();
     }
   }
 }
@@ -554,9 +555,9 @@ class _StatusBadge extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.15),
+        color: color.withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: color.withOpacity(0.4)),
+        border: Border.all(color: color.withValues(alpha: 0.4)),
       ),
       child: Row(mainAxisSize: MainAxisSize.min, children: [
         Icon(icon, size: 14, color: color),

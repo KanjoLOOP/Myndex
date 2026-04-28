@@ -368,7 +368,7 @@ class _ContentFormPageState extends ConsumerState<ContentFormPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _FieldLabel('Título *'),
+                  const _FieldLabel('Título *'),
                   const SizedBox(height: 8),
                   TextFormField(
                     controller: _titleCtrl,
@@ -382,7 +382,7 @@ class _ContentFormPageState extends ConsumerState<ContentFormPage> {
                   ),
 
                   const SizedBox(height: 16),
-                  _FieldLabel('Género'),
+                  const _FieldLabel('Género'),
                   const SizedBox(height: 8),
                   TextFormField(
                     controller: _genreCtrl,
@@ -392,7 +392,7 @@ class _ContentFormPageState extends ConsumerState<ContentFormPage> {
                   ),
 
                   const SizedBox(height: 16),
-                  _FieldLabel('Imagen (URL)'),
+                  const _FieldLabel('Imagen (URL)'),
                   const SizedBox(height: 8),
                   TextFormField(
                     controller: _imageCtrl,
@@ -426,7 +426,7 @@ class _ContentFormPageState extends ConsumerState<ContentFormPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _FieldLabel('Estado'),
+                  const _FieldLabel('Estado'),
                   const SizedBox(height: 8),
                   Container(
                     padding:
@@ -475,7 +475,7 @@ class _ContentFormPageState extends ConsumerState<ContentFormPage> {
                               FilteringTextInputFormatter.digitsOnly
                             ],
                             style: AppTextStyles.bodyLg,
-                            decoration: InputDecoration(
+                            decoration: const InputDecoration(
                                 hintText: 'ej. 12'),
                             validator: (v) {
                               if (v == null || v.isEmpty) return null;
@@ -506,7 +506,7 @@ class _ContentFormPageState extends ConsumerState<ContentFormPage> {
                               FilteringTextInputFormatter.digitsOnly
                             ],
                             style: AppTextStyles.bodyLg,
-                            decoration: InputDecoration(
+                            decoration: const InputDecoration(
                                 hintText: 'ej. 24'),
                           ),
                         ],
@@ -515,7 +515,7 @@ class _ContentFormPageState extends ConsumerState<ContentFormPage> {
                   ]),
 
                   const SizedBox(height: 16),
-                  _FieldLabel('Duración estimada (minutos)'),
+                  const _FieldLabel('Duración estimada (minutos)'),
                   const SizedBox(height: 8),
                   TextFormField(
                     controller: _durationCtrl,
@@ -540,7 +540,7 @@ class _ContentFormPageState extends ConsumerState<ContentFormPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _FieldLabel('Puntuación global'),
+                  const _FieldLabel('Puntuación global'),
                   const SizedBox(height: 10),
                   _InteractiveStars(
                     value: _score,
@@ -548,7 +548,7 @@ class _ContentFormPageState extends ConsumerState<ContentFormPage> {
                   ),
 
                   const SizedBox(height: 20),
-                  _FieldLabel('Valoración por dimensiones'),
+                  const _FieldLabel('Valoración por dimensiones'),
                   const SizedBox(height: 4),
                   Text(
                     'Arrastra para puntuar cada aspecto (0–10)',

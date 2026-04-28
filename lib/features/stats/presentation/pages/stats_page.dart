@@ -25,7 +25,7 @@ class StatsPage extends ConsumerWidget {
               color: Theme.of(context).colorScheme.onSurface),
           onPressed: () => context.pop(),
         ),
-        title: Text('Estadísticas', style: AppTextStyles.titleLg),
+        title: const Text('Estadísticas', style: AppTextStyles.titleLg),
         actions: [
           IconButton(
             icon: const Icon(Icons.timeline_outlined),
@@ -148,7 +148,7 @@ class _StatsBody extends StatelessWidget {
         
         // ── Actividad reciente ─────────────────────────────────────────
         if (activityLog.isNotEmpty) ...[
-          _SectionTitle('Actividad Reciente (7 días)'),
+          const _SectionTitle('Actividad Reciente (7 días)'),
           const SizedBox(height: 12),
           _ActivityChart(activityLog: activityLog),
           const SizedBox(height: 24),
@@ -156,27 +156,27 @@ class _StatsBody extends StatelessWidget {
 
         // ── Score medio ───────────────────────────────────────────────
         if (stats.averageScore != null) ...[
-          _SectionTitle('Puntuación media'),
+          const _SectionTitle('Puntuación media'),
           const SizedBox(height: 12),
           _ScoreCard(score: stats.averageScore!, total: stats.total),
           const SizedBox(height: 24),
         ],
 
         // ── Por tipo ──────────────────────────────────────────────────
-        _SectionTitle('Por tipo'),
+        const _SectionTitle('Por tipo'),
         const SizedBox(height: 12),
         _TypeBars(byType: stats.byType, total: stats.total),
         const SizedBox(height: 24),
 
         // ── Por estado ────────────────────────────────────────────────
-        _SectionTitle('Por estado'),
+        const _SectionTitle('Por estado'),
         const SizedBox(height: 12),
         _StatusBars(byStatus: stats.byStatus, total: stats.total),
         const SizedBox(height: 24),
 
         // ── Top valorados ─────────────────────────────────────────────
         if (stats.topRated.isNotEmpty) ...[
-          _SectionTitle('Top valorados'),
+          const _SectionTitle('Top valorados'),
           const SizedBox(height: 12),
           ...stats.topRated.asMap().entries.map((e) => _TopRatedTile(
                 rank: e.key + 1,
@@ -564,7 +564,7 @@ class _ActivityChart extends StatelessWidget {
           alignment: BarChartAlignment.spaceAround,
           maxY: actualMaxY,
           minY: 0,
-          barTouchData: BarTouchData(enabled: false),
+          barTouchData: const BarTouchData(enabled: false),
           titlesData: FlTitlesData(
             show: true,
             bottomTitles: AxisTitles(

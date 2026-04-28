@@ -71,7 +71,7 @@ class _AdvancedFilterSheetState extends ConsumerState<AdvancedFilterSheet> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('Filtros Avanzados', style: AppTextStyles.titleLg),
+              const Text('Filtros Avanzados', style: AppTextStyles.titleLg),
               TextButton(
                 onPressed: _clear,
                 child: const Text('Limpiar', style: TextStyle(color: AppColors.cyan)),
@@ -122,7 +122,7 @@ class _AdvancedFilterSheetState extends ConsumerState<AdvancedFilterSheet> {
           const SizedBox(height: 8),
           Row(
             children: [
-              Icon(Icons.star_half_rounded, color: AppColors.cyan),
+              const Icon(Icons.star_half_rounded, color: AppColors.cyan),
               Expanded(
                 child: Slider(
                   value: (_minScore ?? 0) / 2,

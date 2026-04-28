@@ -33,7 +33,7 @@ class RadarRatingChart extends StatelessWidget {
             child: CustomPaint(
               painter: _RadarPainter(
                 dimensions: dimensions,
-                fillColor: AppColors.cyan.withOpacity(0.25),
+                fillColor: AppColors.cyan.withValues(alpha: 0.25),
                 strokeColor: AppColors.cyan,
                 gridColor: Theme.of(context).dividerColor,
                 labelColor: Theme.of(context).colorScheme.onSurfaceVariant,

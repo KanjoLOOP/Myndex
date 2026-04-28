@@ -23,7 +23,9 @@ class LocalRecommender {
     final candidates = library.where((item) {
       if (item.id == target.id) return false;
       if (item.status == ContentStatus.completed ||
-          item.status == ContentStatus.dropped) return false;
+          item.status == ContentStatus.dropped) {
+        return false;
+      }
       return true;
     }).toList();
 
@@ -47,7 +49,7 @@ class LocalRecommender {
   /// - Index 7: normalized score (0–1)
   /// - Index 8-N: rating dimensions if available
   static List<double> _featureVector(ContentItem item) {
-    final typeValues = ContentType.values;
+    const typeValues = ContentType.values;
     final typeVec =
         List<double>.generate(typeValues.length, (i) => typeValues[i] == item.type ? 1.0 : 0.0);
 

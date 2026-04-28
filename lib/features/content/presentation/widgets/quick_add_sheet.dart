@@ -80,7 +80,7 @@ class _QuickAddSheetState extends ConsumerState<QuickAddSheet> {
             ),
           ),
           const SizedBox(height: 24),
-          Text('Quick Add', style: AppTextStyles.titleLg),
+          const Text('Quick Add', style: AppTextStyles.titleLg),
           const SizedBox(height: 16),
           TextField(
             controller: _ctrl,

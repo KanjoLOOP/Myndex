@@ -33,7 +33,7 @@ class SettingsPage extends ConsumerWidget {
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 40),
         children: [
           // ── Gestión de datos ──────────────────────────────────────
-          _SectionHeader('Gestión de datos'),
+          const _SectionHeader('Gestión de datos'),
           const SizedBox(height: 10),
           _SettingsGroup(children: [
             _SettingsTile(
@@ -53,7 +53,7 @@ class SettingsPage extends ConsumerWidget {
 
           const SizedBox(height: 24),
           // ── Apariencia ────────────────────────────────────────────
-          _SectionHeader('Apariencia'),
+          const _SectionHeader('Apariencia'),
           const SizedBox(height: 10),
           _SettingsGroup(children: [
             _SettingsTile(
@@ -63,8 +63,8 @@ class SettingsPage extends ConsumerWidget {
               trailing: Switch(
                 value: ref.watch(themeProvider) == ThemeMode.dark,
                 onChanged: (_) => ref.read(themeProvider.notifier).toggleTheme(),
-                activeColor: AppColors.cyan,
-                activeTrackColor: AppColors.blue.withOpacity(0.4),
+                activeThumbColor: AppColors.cyan,
+                activeTrackColor: AppColors.blue.withValues(alpha: 0.4),
               ),
             ),
             Divider(color: Theme.of(context).dividerColor, height: 1),
@@ -89,7 +89,7 @@ class SettingsPage extends ConsumerWidget {
 
           const SizedBox(height: 24),
           // ── General ───────────────────────────────────────────────
-          _SectionHeader('General'),
+          const _SectionHeader('General'),
           const SizedBox(height: 10),
           _SettingsGroup(children: [
             _SettingsTile(
@@ -108,7 +108,7 @@ class SettingsPage extends ConsumerWidget {
           ]),
 
           const SizedBox(height: 32),
-          Center(
+          const Center(
             child: GradientText(
               'Myndex Version 1.0.0',
               style: AppTextStyles.labelMd,
@@ -182,8 +182,8 @@ class SettingsPage extends ConsumerWidget {
       builder: (_) => AlertDialog(
         backgroundColor: Theme.of(context).cardTheme.color,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: GradientText('Myndex', style: AppTextStyles.headlineMd),
-        content: Text(
+        title: const GradientText('Myndex', style: AppTextStyles.headlineMd),
+        content: const Text(
           'Tu biblioteca personal de contenido.\n'
           'Films, series, juegos, libros — todo en un sitio.',
           style: AppTextStyles.bodyMd,
@@ -248,7 +248,7 @@ class _SettingsTile extends StatelessWidget {
         width: 36,
         height: 36,
         decoration: BoxDecoration(
-          color: iconColor.withOpacity(0.12),
+          color: iconColor.withValues(alpha: 0.12),
           borderRadius: BorderRadius.circular(10),
         ),
         child: Icon(icon, color: iconColor, size: 18),
