@@ -19,8 +19,36 @@ class ContentCard extends StatelessWidget {
         ContentStatus.dropped    => AppColors.statusDropped,
       };
 
+  /// Returns progress ratio 0..1 or null if no progress data.
+  double? get _progressRatio {
+    final total = item.totalUnits;
+    if (total == null || total == 0) return null;
+    return ((item.progressUnits ?? 0) / total).clamp(0.0, 1.0);
+  }
+
+  /// Returns a short human-readable remaining time string, or null.
+  String? get _remainingTime {
+    final total = item.totalUnits;
+    final dur   = item.estimatedDurationMinutes;
+    if (total == null || dur == null || total == 0) return null;
+
+    final current    = item.progressUnits ?? 0;
+    final remaining  = total - current;
+    if (remaining <= 0) return null;
+
+    // Per-unit minutes = total duration / total units
+    final minsLeft = (dur / total * remaining).round();
+    if (minsLeft < 60) return '${minsLeft}min';
+    final h = minsLeft ~/ 60;
+    final m = minsLeft % 60;
+    return m == 0 ? '${h}h' : '${h}h ${m}m';
+  }
+
   @override
   Widget build(BuildContext context) {
+    final ratio = _progressRatio;
+    final time  = _remainingTime;
+
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -32,7 +60,7 @@ class ContentCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // ── Portada ────────────────────────────────────────────────
+            // ── Portada ──────────────────────────────────────────────
             Expanded(
               child: Stack(
                 fit: StackFit.expand,
@@ -50,6 +78,7 @@ class ContentCard extends StatelessWidget {
                           )
                         : _Placeholder(item.type),
                   ),
+                  // Favorito badge
                   if (item.isFavorite)
                     Positioned(
                       top: 6,
@@ -67,10 +96,47 @@ class ContentCard extends StatelessWidget {
                         ),
                       ),
                     ),
+                  // Tiempo restante badge (top-left)
+                  if (time != null &&
+                      item.status == ContentStatus.inProgress)
+                    Positioned(
+                      top: 6,
+                      left: 6,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 6, vertical: 3),
+                        decoration: BoxDecoration(
+                          color: Colors.black.withValues(alpha: 0.7),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Row(mainAxisSize: MainAxisSize.min, children: [
+                          const Icon(Icons.timer_outlined,
+                              size: 10, color: AppColors.cyan),
+                          const SizedBox(width: 3),
+                          Text(time,
+                              style: AppTextStyles.labelSm.copyWith(
+                                  color: AppColors.cyan, fontSize: 9)),
+                        ]),
+                      ),
+                    ),
                 ],
               ),
             ),
-            // ── Metadata ───────────────────────────────────────────────
+
+            // ── Barra de progreso ────────────────────────────────────
+            if (ratio != null && item.status == ContentStatus.inProgress)
+              ClipRRect(
+                child: LinearProgressIndicator(
+                  value: ratio,
+                  minHeight: 3,
+                  backgroundColor:
+                      Theme.of(context).colorScheme.surface,
+                  valueColor:
+                      const AlwaysStoppedAnimation<Color>(AppColors.cyan),
+                ),
+              ),
+
+            // ── Metadata ─────────────────────────────────────────────
             Padding(
               padding: const EdgeInsets.fromLTRB(10, 8, 10, 10),
               child: Column(
@@ -82,9 +148,9 @@ class ContentCard extends StatelessWidget {
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  const SizedBox(height: 6),
+                  const SizedBox(height: 5),
                   Row(children: [
-                    // Status dot + label
+                    // Status dot
                     Container(
                       width: 6, height: 6,
                       decoration: BoxDecoration(
@@ -93,18 +159,28 @@ class ContentCard extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(width: 5),
-                    Text(item.status.label,
+                    Expanded(
+                      child: Text(
+                        // Show "Ep. X/Y" when in progress with units
+                        item.status == ContentStatus.inProgress &&
+                                item.progressUnits != null &&
+                                item.totalUnits != null
+                            ? '${item.progressUnits}/${item.totalUnits}'
+                            : item.status.label,
                         style: AppTextStyles.labelSm
-                            .copyWith(color: _statusColor(item.status))),
+                            .copyWith(color: _statusColor(item.status)),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    if (item.score != null) ...[
+                      const Icon(Icons.star_rounded,
+                          size: 11, color: AppColors.cyan),
+                      const SizedBox(width: 2),
+                      Text('${item.score}',
+                          style: AppTextStyles.labelSm
+                              .copyWith(color: AppColors.cyan)),
+                    ],
                   ]),
-                  if (item.score != null) ...[
-                    const SizedBox(height: 4),
-                    Row(children: [
-                      const Icon(Icons.star_rounded, size: 12, color: AppColors.cyan),
-                      const SizedBox(width: 3),
-                      Text('${item.score}', style: AppTextStyles.labelSm.copyWith(color: AppColors.cyan)),
-                    ]),
-                  ],
                 ],
               ),
             ),
@@ -134,7 +210,8 @@ class _Placeholder extends StatelessWidget {
     return Container(
       color: Theme.of(context).colorScheme.surface,
       child: Center(
-        child: Icon(icon, size: 40, color: Theme.of(context).colorScheme.onSurfaceVariant),
+        child: Icon(icon, size: 40,
+            color: Theme.of(context).colorScheme.onSurfaceVariant),
       ),
     );
   }

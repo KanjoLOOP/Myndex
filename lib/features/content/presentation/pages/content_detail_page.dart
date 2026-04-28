@@ -12,6 +12,7 @@ import '../../../vault/domain/entities/collection.dart';
 import '../../../vault/presentation/providers/vault_providers.dart';
 import '../providers/content_providers.dart';
 import '../widgets/radar_rating_chart.dart';
+import '../../domain/entities/content_item.dart';
 
 class ContentDetailPage extends ConsumerWidget {
   final int id;
@@ -174,6 +175,14 @@ class ContentDetailPage extends ConsumerWidget {
                     ),
                     const SizedBox(height: 20),
 
+                    // ── Smart tracking — siguiente episodio ─────────────
+                    if (item.status != ContentStatus.completed &&
+                        item.status != ContentStatus.dropped &&
+                        item.totalUnits != null) ...[
+                      _NextUnitButton(item: item, ref: ref),
+                      const SizedBox(height: 20),
+                    ],
+
                     if (item.score != null) ...[
                       Text('Tu valoración',
                           style: AppTextStyles.titleMd.copyWith(
@@ -254,6 +263,13 @@ class ContentDetailPage extends ConsumerWidget {
                                     .colorScheme
                                     .onSurface)),
                       ),
+                    ],
+
+                    // ── Recomendaciones ─────────────────────────────────
+                    if (item.id != null) ...[
+                      const SizedBox(height: 28),
+                      _RecommendationsSection(
+                          targetId: item.id!, ref: ref, context: context),
                     ],
 
                     const SizedBox(height: 20),
@@ -652,4 +668,231 @@ class _ProgressSection extends StatelessWidget {
       ]),
     );
   }
+}
+
+// ── Next unit button ─────────────────────────────────────────────────────
+
+class _NextUnitButton extends StatefulWidget {
+  final ContentItem item;
+  final WidgetRef ref;
+  const _NextUnitButton({required this.item, required this.ref});
+
+  @override
+  State<_NextUnitButton> createState() => _NextUnitButtonState();
+}
+
+class _NextUnitButtonState extends State<_NextUnitButton> {
+  bool _loading = false;
+
+  String get _unitLabel => switch (widget.item.type) {
+        ContentType.series || ContentType.anime  => 'episodio',
+        ContentType.book                         => 'página',
+        ContentType.podcast                      => 'episodio',
+        _                                        => 'unidad',
+      };
+
+  String? get _remainingLabel {
+    final total = widget.item.totalUnits;
+    final dur   = widget.item.estimatedDurationMinutes;
+    if (total == null || dur == null || total == 0) return null;
+    final current   = widget.item.progressUnits ?? 0;
+    final remaining = total - current;
+    if (remaining <= 0) return null;
+    final minsLeft = (dur / total * remaining).round();
+    if (minsLeft < 60) return 'Te quedan ~${minsLeft}min';
+    final h = minsLeft ~/ 60;
+    final m = minsLeft % 60;
+    return m == 0 ? 'Te quedan ~${h}h' : 'Te quedan ~${h}h ${m}min';
+  }
+
+  Future<void> _increment() async {
+    setState(() => _loading = true);
+    await widget.ref.read(incrementProgressProvider)(widget.item);
+    if (mounted) setState(() => _loading = false);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final current = widget.item.progressUnits ?? 0;
+    final total   = widget.item.totalUnits!;
+    final isLast  = current + 1 >= total;
+    final remaining = _remainingLabel;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Remaining time chip
+        if (remaining != null) ...[
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            decoration: BoxDecoration(
+              color: AppColors.cyan.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(color: AppColors.cyan.withValues(alpha: 0.3)),
+            ),
+            child: Row(mainAxisSize: MainAxisSize.min, children: [
+              const Icon(Icons.timer_outlined,
+                  size: 14, color: AppColors.cyan),
+              const SizedBox(width: 6),
+              Text(remaining,
+                  style: AppTextStyles.labelMd
+                      .copyWith(color: AppColors.cyan)),
+            ]),
+          ),
+          const SizedBox(height: 10),
+        ],
+
+        // Next unit button
+        GestureDetector(
+          onTap: _loading ? null : _increment,
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(vertical: 14),
+            decoration: BoxDecoration(
+              gradient: isLast ? AppColors.gradientH : null,
+              color: isLast ? null : Theme.of(context).cardTheme.color,
+              borderRadius: BorderRadius.circular(28),
+              border: Border.all(
+                color: isLast ? Colors.transparent : AppColors.cyan,
+              ),
+            ),
+            child: _loading
+                ? const Center(
+                    child: SizedBox(
+                      width: 18, height: 18,
+                      child: CircularProgressIndicator(
+                          color: AppColors.cyan, strokeWidth: 2),
+                    ))
+                : Row(mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        isLast
+                            ? Icons.check_circle_outline
+                            : Icons.skip_next_rounded,
+                        color: isLast
+                            ? Colors.white
+                            : AppColors.cyan,
+                        size: 20,
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        isLast
+                            ? 'Marcar como completado'
+                            : 'Siguiente $_unitLabel  ($current/$total)',
+                        style: AppTextStyles.labelMd.copyWith(
+                          color: isLast ? Colors.white : AppColors.cyan,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ]),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+// ── Recommendations section ───────────────────────────────────────────────
+
+class _RecommendationsSection extends StatelessWidget {
+  final int targetId;
+  final WidgetRef ref;
+  final BuildContext context;
+  const _RecommendationsSection(
+      {required this.targetId,
+       required this.ref,
+       required this.context});
+
+  @override
+  Widget build(BuildContext _) {
+    final asyncRecs = ref.watch(recommendationsProvider(targetId));
+
+    return asyncRecs.when(
+      loading: () => const SizedBox.shrink(),
+      error: (_, __) => const SizedBox.shrink(),
+      data: (recs) {
+        if (recs.isEmpty) return const SizedBox.shrink();
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const _SectionHeader('Puede que también te guste'),
+            const SizedBox(height: 12),
+            SizedBox(
+              height: 140,
+              child: ListView.separated(
+                scrollDirection: Axis.horizontal,
+                itemCount: recs.length,
+                separatorBuilder: (_, __) => const SizedBox(width: 10),
+                itemBuilder: (ctx, i) {
+                  final rec = recs[i];
+                  return GestureDetector(
+                    onTap: () => ctx.push('/content/${rec.id}'),
+                    child: SizedBox(
+                      width: 90,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Thumbnail
+                          Expanded(
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(10),
+                              child: rec.imageUrl != null &&
+                                      rec.imageUrl!.isNotEmpty
+                                  ? CachedNetworkImage(
+                                      imageUrl: rec.imageUrl!,
+                                      fit: BoxFit.cover,
+                                      width: double.infinity,
+                                      errorWidget: (_, __, ___) =>
+                                          _RecPlaceholder(rec.type),
+                                    )
+                                  : _RecPlaceholder(rec.type),
+                            ),
+                          ),
+                          const SizedBox(height: 5),
+                          Text(
+                            rec.title,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: AppTextStyles.labelSm.copyWith(
+                                color: Theme.of(ctx)
+                                    .colorScheme
+                                    .onSurface),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+}
+
+class _RecPlaceholder extends StatelessWidget {
+  final ContentType type;
+  const _RecPlaceholder(this.type);
+
+  IconData get icon => switch (type) {
+        ContentType.movie   => Icons.movie_outlined,
+        ContentType.series  => Icons.tv_outlined,
+        ContentType.book    => Icons.menu_book_outlined,
+        ContentType.game    => Icons.sports_esports_outlined,
+        ContentType.anime   => Icons.animation_outlined,
+        ContentType.podcast => Icons.podcasts_outlined,
+        ContentType.other   => Icons.category_outlined,
+      };
+
+  @override
+  Widget build(BuildContext context) => Container(
+        color: Theme.of(context).colorScheme.surface,
+        child: Center(
+          child: Icon(icon, size: 24,
+              color: Theme.of(context).colorScheme.onSurfaceVariant),
+        ),
+      );
 }

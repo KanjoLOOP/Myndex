@@ -5,6 +5,7 @@ import '../../../../core/database/app_database.dart' show databaseProvider;
 import '../../data/datasources/content_local_datasource.dart';
 import '../../data/repositories/content_repository_impl.dart';
 import '../../domain/entities/content_item.dart';
+import '../../domain/recommender/local_recommender.dart';
 import '../../domain/repositories/content_repository.dart';
 import '../../domain/usecases/delete_content_item.dart';
 import '../../domain/usecases/get_content_list.dart';
@@ -105,4 +106,36 @@ final toggleFavoriteProvider =
     ref.invalidate(contentListProvider);
     ref.invalidate(contentItemProvider(item.id!));
   };
+});
+
+/// Incrementa el progreso en 1 unidad.
+/// Si llega al total, marca automáticamente como [ContentStatus.completed].
+final incrementProgressProvider =
+    Provider<Future<void> Function(ContentItem)>((ref) {
+  final repo = ref.watch(contentRepositoryProvider);
+  return (item) async {
+    final next = (item.progressUnits ?? 0) + 1;
+    final total = item.totalUnits;
+    final completed = total != null && next >= total;
+    final updated = item.copyWith(
+      progressUnits: next,
+      status: completed ? ContentStatus.completed : ContentStatus.inProgress,
+      completedAt: completed ? DateTime.now() : null,
+      updatedAt: DateTime.now(),
+    );
+    await repo.update(updated);
+    ref.invalidate(contentListProvider);
+    ref.invalidate(contentItemProvider(item.id!));
+  };
+});
+
+/// Recomendaciones locales basadas en similitud coseno para un [ContentItem].
+/// Devuelve hasta 5 ítems del backlog más similares al objetivo.
+final recommendationsProvider =
+    FutureProvider.family<List<ContentItem>, int>((ref, targetId) async {
+  final repo = ref.watch(contentRepositoryProvider);
+  final target = await repo.getById(targetId);
+  if (target == null) return [];
+  final library = await GetContentList(repo).call();
+  return LocalRecommender.recommend(target: target, library: library);
 });
