@@ -632,7 +632,7 @@ class _ProgressSection extends StatelessWidget {
               style: AppTextStyles.titleMd
                   .copyWith(color: Theme.of(context).colorScheme.onSurface)),
           const Spacer(),
-          Text(' /    (%)',
+          Text('$current / $total $label  ($pct%)',
               style: AppTextStyles.labelSm.copyWith(
                   color: Theme.of(context).colorScheme.onSurfaceVariant)),
         ]),

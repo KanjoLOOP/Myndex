@@ -361,10 +361,6 @@ class _FilterPanelState extends State<_FilterPanel> {
     Navigator.of(context).pop();
   }
 
-  void _clear() {
-    widget.onClear();
-    Navigator.of(context).pop();
-  }
 
   @override
   Widget build(BuildContext context) {
