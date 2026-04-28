@@ -169,6 +169,10 @@ class _HomePageState extends ConsumerState<HomePage> {
     );
   }
 
+  void _goToAddForm() {
+    context.push('/content/new');
+  }
+
   @override
   Widget build(BuildContext context) {
     final asyncItems = ref.watch(contentListProvider);
@@ -228,44 +232,46 @@ class _HomePageState extends ConsumerState<HomePage> {
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // ── Filtros de tipo ────────────────────────────────────────
+          // ── Barra de filtros combinada ────────────────────────────────
           SizedBox(
             height: 44,
-            child: ListView.separated(
+            child: ListView(
               scrollDirection: Axis.horizontal,
               padding: const EdgeInsets.symmetric(horizontal: 16),
-              itemCount: _typeFilters.length,
-              separatorBuilder: (_, __) => const SizedBox(width: 8),
-              itemBuilder: (_, i) {
-                final f = _typeFilters[i];
-                return _FilterChip(
-                  label: f.label,
-                  selected: _selectedType == f.type,
-                  onTap: () => _applyTypeFilter(f.type),
-                );
-              },
+              children: [
+                // Tipo
+                ..._typeFilters.map((f) => Padding(
+                  padding: const EdgeInsets.only(right: 8),
+                  child: _FilterChip(
+                    label: f.label,
+                    selected: _selectedType == f.type,
+                    onTap: () => _applyTypeFilter(f.type),
+                  ),
+                )),
+                // Separador
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 10),
+                  child: VerticalDivider(
+                    width: 1,
+                    thickness: 1,
+                    color: Theme.of(context).dividerColor,
+                  ),
+                ),
+                const SizedBox(width: 4),
+                // Estado
+                ..._statusFilters.map((f) => Padding(
+                  padding: const EdgeInsets.only(right: 8),
+                  child: _FilterChip(
+                    label: f.label,
+                    selected: _selectedStatus == f.status,
+                    onTap: () => _applyStatusFilter(f.status),
+                    isStatus: true,
+                  ),
+                )),
+              ],
             ),
           ),
-          const SizedBox(height: 8),
-
-          // ── Filtros de estado ──────────────────────────────────────
-          SizedBox(
-            height: 44,
-            child: ListView.separated(
-              scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              itemCount: _statusFilters.length,
-              separatorBuilder: (_, __) => const SizedBox(width: 8),
-              itemBuilder: (_, i) {
-                final f = _statusFilters[i];
-                return _FilterChip(
-                  label: f.label,
-                  selected: _selectedStatus == f.status,
-                  onTap: () => _applyStatusFilter(f.status),
-                );
-              },
-            ),
-          ),
+          const SizedBox(height: 4),
 
           // ── Indicador de filtros activos ───────────────────────────
           if (_hasAdvancedFilter)
@@ -337,7 +343,8 @@ class _HomePageState extends ConsumerState<HomePage> {
         ],
       ),
       floatingActionButton: _GradientFAB(
-        onPressed: _showQuickAddSheet,
+        onTap: _goToAddForm,
+        onLongPress: _showQuickAddSheet,
       ),
     );
   }
@@ -348,68 +355,120 @@ class _FilterChip extends StatelessWidget {
   final String label;
   final bool selected;
   final VoidCallback onTap;
-  const _FilterChip(
-      {required this.label, required this.selected, required this.onTap});
+  final bool isStatus;
+  const _FilterChip({
+    required this.label,
+    required this.selected,
+    required this.onTap,
+    this.isStatus = false,
+  });
 
   @override
   Widget build(BuildContext context) {
-    if (selected) {
-      return GestureDetector(
-        onTap: onTap,
-        child: Container(
-          padding:
-              const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          decoration: BoxDecoration(
-            gradient: AppColors.gradientH,
-            borderRadius: BorderRadius.circular(20),
-          ),
-          child: Text(label,
-              style: AppTextStyles.labelMd.copyWith(
-                  color: Colors.white, fontWeight: FontWeight.w600)),
-        ),
-      );
-    }
     return GestureDetector(
       onTap: onTap,
-      child: Container(
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 180),
+        curve: Curves.easeOut,
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.surface,
+          gradient: selected ? AppColors.gradientH : null,
+          color: selected
+              ? null
+              : isStatus
+                  ? Theme.of(context).colorScheme.surface.withValues(alpha: 0.5)
+                  : Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: Theme.of(context).dividerColor),
+          border: Border.all(
+            color: selected
+                ? Colors.transparent
+                : Theme.of(context).dividerColor.withValues(alpha: isStatus ? 0.5 : 1.0),
+            width: 1,
+          ),
         ),
-        child: Text(label,
-            style: AppTextStyles.labelMd.copyWith(
-                color: Theme.of(context).colorScheme.onSurface)),
+        child: Text(
+          label,
+          style: AppTextStyles.labelMd.copyWith(
+            color: selected
+                ? Colors.white
+                : Theme.of(context).colorScheme.onSurface.withValues(
+                    alpha: isStatus ? 0.65 : 1.0),
+            fontWeight: selected ? FontWeight.w600 : FontWeight.normal,
+          ),
+        ),
       ),
     );
   }
 }
 
+
 // ── FAB con gradiente ──────────────────────────────────────────────────────
-class _GradientFAB extends StatelessWidget {
-  final VoidCallback onPressed;
-  const _GradientFAB({required this.onPressed});
+class _GradientFAB extends StatefulWidget {
+  final VoidCallback onTap;
+  final VoidCallback onLongPress;
+  const _GradientFAB({required this.onTap, required this.onLongPress});
+
+  @override
+  State<_GradientFAB> createState() => _GradientFABState();
+}
+
+class _GradientFABState extends State<_GradientFAB>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _ctrl;
+  late final Animation<double> _scale;
+
+  @override
+  void initState() {
+    super.initState();
+    _ctrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 100),
+      lowerBound: 0,
+      upperBound: 0.06,
+    );
+    _scale = Tween<double>(begin: 1.0, end: 0.94).animate(
+      CurvedAnimation(parent: _ctrl, curve: Curves.easeOut),
+    );
+  }
+
+  @override
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onPressed,
-      child: Container(
-        width: 60,
-        height: 60,
-        decoration: BoxDecoration(
-          gradient: AppColors.gradientH,
-          borderRadius: BorderRadius.circular(18),
-          boxShadow: [
-            BoxShadow(
-              color: AppColors.blue.withOpacity(0.4),
-              blurRadius: 20,
-              offset: const Offset(0, 8),
+    return Tooltip(
+      message: 'Añadir  •  Mantén pulsado para entrada rápida',
+      child: GestureDetector(
+        onTap: () {
+          _ctrl.forward().then((_) => _ctrl.reverse());
+          widget.onTap();
+        },
+        onLongPress: () {
+          _ctrl.forward().then((_) => _ctrl.reverse());
+          widget.onLongPress();
+        },
+        child: ScaleTransition(
+          scale: _scale,
+          child: Container(
+            width: 60,
+            height: 60,
+            decoration: BoxDecoration(
+              gradient: AppColors.gradientH,
+              borderRadius: BorderRadius.circular(18),
+              boxShadow: [
+                BoxShadow(
+                  color: AppColors.blue.withValues(alpha: 0.4),
+                  blurRadius: 20,
+                  offset: const Offset(0, 8),
+                ),
+              ],
             ),
-          ],
+            child: const Icon(Icons.add, color: Colors.white, size: 28),
+          ),
         ),
-        child: const Icon(Icons.add, color: Colors.white, size: 28),
       ),
     );
   }
