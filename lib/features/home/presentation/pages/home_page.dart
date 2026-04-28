@@ -22,34 +22,16 @@ class _HomePageState extends ConsumerState<HomePage> {
   ContentStatus? _selectedStatus;
   double?        _selectedMinScore;
 
-  static const _typeFilters = [
-    (label: 'Todo',    type: null as ContentType?),
-    (label: 'Cine',    type: ContentType.movie),
-    (label: 'Series',  type: ContentType.series),
-    (label: 'Libros',  type: ContentType.book),
-    (label: 'Juegos',  type: ContentType.game),
-    (label: 'Anime',   type: ContentType.anime),
-  ];
+  bool get _hasFilter =>
+      _selectedType != null || _selectedStatus != null || _selectedMinScore != null;
 
-  static const _statusFilters = [
-    (label: 'Todos',      status: null as ContentStatus?),
-    (label: 'Pendiente',  status: ContentStatus.pending),
-    (label: 'En curso',   status: ContentStatus.inProgress),
-    (label: 'Completado', status: ContentStatus.completed),
-    (label: 'Abandonado', status: ContentStatus.dropped),
-  ];
+  int get _activeFilterCount => [
+        _selectedType,
+        _selectedStatus,
+        _selectedMinScore,
+      ].where((v) => v != null).length;
 
-  // score stored as 0-10; displayed as stars (÷2)
-  static const _scoreOptions = [
-    (label: 'Sin filtro', score: null as double?),
-    (label: '≥ 2 ★',     score: 4.0),
-    (label: '≥ 3 ★',     score: 6.0),
-    (label: '≥ 4 ★',     score: 8.0),
-    (label: 'Solo 5 ★',  score: 10.0),
-  ];
-
-  bool get _hasAdvancedFilter =>
-      _selectedStatus != null || _selectedMinScore != null;
+  // ── Filter helpers ────────────────────────────────────────────────────────
 
   void _applyTypeFilter(ContentType? type) {
     setState(() => _selectedType = type);
@@ -78,84 +60,29 @@ class _HomePageState extends ConsumerState<HomePage> {
       _selectedStatus   = null;
       _selectedMinScore = null;
     });
-    ref.read(filterStateProvider.notifier).update(
-          (_) => const FilterState(),
-        );
+    ref.read(filterStateProvider.notifier).update((_) => const FilterState());
   }
 
-  void _openScoreSheet() {
+  // ── Filter panel ──────────────────────────────────────────────────────────
+
+  void _openFilterPanel() {
     showModalBottomSheet<void>(
       context: context,
-      backgroundColor: Theme.of(context).cardTheme.color,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (ctx) => Padding(
-        padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Center(
-              child: Container(
-                width: 36, height: 4,
-                decoration: BoxDecoration(
-                  color: Theme.of(context).dividerColor,
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-            ),
-            const SizedBox(height: 16),
-            Text('Puntuación mínima',
-                style: AppTextStyles.titleMd.copyWith(
-                    color: Theme.of(context).colorScheme.onSurface)),
-            const SizedBox(height: 16),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: _scoreOptions.map((o) {
-                final selected = _selectedMinScore == o.score;
-                return GestureDetector(
-                  onTap: () {
-                    _applyScoreFilter(o.score);
-                    Navigator.of(ctx).pop();
-                  },
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 150),
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 16, vertical: 10),
-                    decoration: BoxDecoration(
-                      gradient: selected ? AppColors.gradientH : null,
-                      color: selected
-                          ? null
-                          : Theme.of(context).colorScheme.surface,
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(
-                        color: selected
-                            ? Colors.transparent
-                            : Theme.of(context).dividerColor,
-                      ),
-                    ),
-                    child: Text(
-                      o.label,
-                      style: AppTextStyles.labelMd.copyWith(
-                        color: selected
-                            ? Colors.white
-                            : Theme.of(context).colorScheme.onSurface,
-                        fontWeight: selected
-                            ? FontWeight.w600
-                            : FontWeight.w500,
-                      ),
-                    ),
-                  ),
-                );
-              }).toList(),
-            ),
-          ],
-        ),
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => _FilterPanel(
+        selectedType:     _selectedType,
+        selectedStatus:   _selectedStatus,
+        selectedMinScore: _selectedMinScore,
+        onTypeChanged:    _applyTypeFilter,
+        onStatusChanged:  _applyStatusFilter,
+        onScoreChanged:   _applyScoreFilter,
+        onClear:          _clearAllFilters,
       ),
     );
   }
+
+  // ── Quick add ─────────────────────────────────────────────────────────────
 
   void _showQuickAddSheet() {
     showModalBottomSheet(
@@ -165,13 +92,13 @@ class _HomePageState extends ConsumerState<HomePage> {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      builder: (ctx) => const QuickAddSheet(),
+      builder: (_) => const QuickAddSheet(),
     );
   }
 
-  void _goToAddForm() {
-    context.push('/content/new');
-  }
+  void _goToAddForm() => context.push('/content/new');
+
+  // ── Build ─────────────────────────────────────────────────────────────────
 
   @override
   Widget build(BuildContext context) {
@@ -187,40 +114,54 @@ class _HomePageState extends ConsumerState<HomePage> {
           style: AppTextStyles.headlineLg.copyWith(fontSize: 26),
         ),
         actions: [
+          // Stats
           IconButton(
             icon: Icon(Icons.bar_chart_outlined,
                 color: Theme.of(context).colorScheme.onSurfaceVariant),
             onPressed: () => context.push('/stats'),
             tooltip: 'Estadísticas',
           ),
+          // Search
           IconButton(
             icon: Icon(Icons.search,
                 color: Theme.of(context).colorScheme.onSurfaceVariant),
             onPressed: () => context.go('/explore'),
+            tooltip: 'Buscar',
           ),
-          // Score filter with active indicator
+          // Unified filter button with badge
           Stack(
             alignment: Alignment.center,
             children: [
               IconButton(
                 icon: Icon(
                   Icons.tune_rounded,
-                  color: _selectedMinScore != null
+                  color: _hasFilter
                       ? AppColors.cyan
                       : Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
-                onPressed: _openScoreSheet,
-                tooltip: 'Filtrar por puntuación',
+                onPressed: _openFilterPanel,
+                tooltip: 'Filtros',
               ),
-              if (_selectedMinScore != null)
+              if (_hasFilter)
                 Positioned(
                   top: 10,
-                  right: 10,
+                  right: 8,
                   child: Container(
-                    width: 8, height: 8,
+                    width: 16,
+                    height: 16,
                     decoration: const BoxDecoration(
-                      color: AppColors.cyan,
+                      gradient: AppColors.gradientH,
                       shape: BoxShape.circle,
+                    ),
+                    child: Center(
+                      child: Text(
+                        '$_activeFilterCount',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 9,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
                     ),
                   ),
                 ),
@@ -232,70 +173,39 @@ class _HomePageState extends ConsumerState<HomePage> {
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // ── Barra de filtros combinada ────────────────────────────────
-          SizedBox(
-            height: 44,
-            child: ListView(
-              scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              children: [
-                // Tipo
-                ..._typeFilters.map((f) => Padding(
-                  padding: const EdgeInsets.only(right: 8),
-                  child: _FilterChip(
-                    label: f.label,
-                    selected: _selectedType == f.type,
-                    onTap: () => _applyTypeFilter(f.type),
-                  ),
-                )),
-                // Separador
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 10),
-                  child: VerticalDivider(
-                    width: 1,
-                    thickness: 1,
-                    color: Theme.of(context).dividerColor,
-                  ),
-                ),
-                const SizedBox(width: 4),
-                // Estado
-                ..._statusFilters.map((f) => Padding(
-                  padding: const EdgeInsets.only(right: 8),
-                  child: _FilterChip(
-                    label: f.label,
-                    selected: _selectedStatus == f.status,
-                    onTap: () => _applyStatusFilter(f.status),
-                    isStatus: true,
-                  ),
-                )),
-              ],
-            ),
-          ),
-          const SizedBox(height: 4),
-
-          // ── Indicador de filtros activos ───────────────────────────
-          if (_hasAdvancedFilter)
+          // ── Active filter summary pill ────────────────────────────────
+          if (_hasFilter)
             Padding(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
               child: Row(children: [
-                Container(
-                  width: 6, height: 6,
-                  decoration: const BoxDecoration(
-                    color: AppColors.cyan, shape: BoxShape.circle),
+                Expanded(
+                  child: SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(children: [
+                      if (_selectedType != null)
+                        _ActiveFilterPill(
+                          label: _selectedType!.label,
+                          onRemove: () => _applyTypeFilter(null),
+                        ),
+                      if (_selectedStatus != null)
+                        _ActiveFilterPill(
+                          label: _selectedStatus!.label,
+                          onRemove: () => _applyStatusFilter(null),
+                        ),
+                      if (_selectedMinScore != null)
+                        _ActiveFilterPill(
+                          label: '≥ ${(_selectedMinScore! / 2).toStringAsFixed(0)} ★',
+                          onRemove: () => _applyScoreFilter(null),
+                        ),
+                    ]),
+                  ),
                 ),
-                const SizedBox(width: 6),
-                Text(
-                  'Filtros activos',
-                  style: AppTextStyles.labelMd.copyWith(
-                      color: AppColors.cyan),
-                ),
-                const Spacer(),
+                const SizedBox(width: 8),
                 GestureDetector(
                   onTap: _clearAllFilters,
                   child: Text(
-                    'Limpiar todo',
-                    style: AppTextStyles.labelMd.copyWith(
+                    'Limpiar',
+                    style: AppTextStyles.labelSm.copyWith(
                       color: Theme.of(context).colorScheme.onSurfaceVariant,
                       decoration: TextDecoration.underline,
                     ),
@@ -306,7 +216,7 @@ class _HomePageState extends ConsumerState<HomePage> {
           else
             const SizedBox(height: 8),
 
-          // ── Lista de contenido ─────────────────────────────────────
+          // ── Content grid ──────────────────────────────────────────────
           Expanded(
             child: asyncItems.when(
               loading: () => const Center(
@@ -316,14 +226,9 @@ class _HomePageState extends ConsumerState<HomePage> {
                 child: Text('Error: $e', style: AppTextStyles.bodyMd),
               ),
               data: (items) => items.isEmpty
-                  ? _EmptyState(
-                      hasFilter: _selectedType != null ||
-                          _selectedStatus != null ||
-                          _selectedMinScore != null,
-                    )
+                  ? _EmptyState(hasFilter: _hasFilter)
                   : GridView.builder(
-                      padding:
-                          const EdgeInsets.fromLTRB(16, 0, 16, 100),
+                      padding: const EdgeInsets.fromLTRB(16, 0, 16, 100),
                       gridDelegate:
                           const SliverGridDelegateWithFixedCrossAxisCount(
                         crossAxisCount: 2,
@@ -334,8 +239,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                       itemCount: items.length,
                       itemBuilder: (_, i) => ContentCard(
                         item: items[i],
-                        onTap: () =>
-                            context.push('/content/${items[i].id}'),
+                        onTap: () => context.push('/content/${items[i].id}'),
                       ),
                     ),
             ),
@@ -350,40 +254,278 @@ class _HomePageState extends ConsumerState<HomePage> {
   }
 }
 
-// ── Filter chip ────────────────────────────────────────────────────────────
-class _FilterChip extends StatelessWidget {
+// ── Active filter pill ────────────────────────────────────────────────────
+
+class _ActiveFilterPill extends StatelessWidget {
+  final String label;
+  final VoidCallback onRemove;
+  const _ActiveFilterPill({required this.label, required this.onRemove});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.only(right: 8),
+      padding: const EdgeInsets.only(left: 12, right: 4, top: 5, bottom: 5),
+      decoration: BoxDecoration(
+        color: AppColors.cyan.withValues(alpha: 0.15),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: AppColors.cyan.withValues(alpha: 0.35)),
+      ),
+      child: Row(mainAxisSize: MainAxisSize.min, children: [
+        Text(
+          label,
+          style: AppTextStyles.labelSm.copyWith(
+            color: AppColors.cyan,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        const SizedBox(width: 4),
+        GestureDetector(
+          onTap: onRemove,
+          child: const Icon(Icons.close, size: 14, color: AppColors.cyan),
+        ),
+      ]),
+    );
+  }
+}
+
+// ── Filter panel (bottom sheet) ───────────────────────────────────────────
+
+class _FilterPanel extends StatefulWidget {
+  final ContentType?   selectedType;
+  final ContentStatus? selectedStatus;
+  final double?        selectedMinScore;
+  final ValueChanged<ContentType?>   onTypeChanged;
+  final ValueChanged<ContentStatus?> onStatusChanged;
+  final ValueChanged<double?>        onScoreChanged;
+  final VoidCallback onClear;
+
+  const _FilterPanel({
+    required this.selectedType,
+    required this.selectedStatus,
+    required this.selectedMinScore,
+    required this.onTypeChanged,
+    required this.onStatusChanged,
+    required this.onScoreChanged,
+    required this.onClear,
+  });
+
+  @override
+  State<_FilterPanel> createState() => _FilterPanelState();
+}
+
+class _FilterPanelState extends State<_FilterPanel> {
+  late ContentType?   _type;
+  late ContentStatus? _status;
+  late double?        _score;
+
+  @override
+  void initState() {
+    super.initState();
+    _type   = widget.selectedType;
+    _status = widget.selectedStatus;
+    _score  = widget.selectedMinScore;
+  }
+
+  static const _types = [
+    (label: 'Todos', type: null as ContentType?),
+    (label: 'Cine',   type: ContentType.movie),
+    (label: 'Series', type: ContentType.series),
+    (label: 'Libros', type: ContentType.book),
+    (label: 'Juegos', type: ContentType.game),
+    (label: 'Anime',  type: ContentType.anime),
+    (label: 'Podcast', type: ContentType.podcast),
+    (label: 'Otro',   type: ContentType.other),
+  ];
+
+  static const _statuses = [
+    (label: 'Todos',       status: null as ContentStatus?),
+    (label: 'Pendiente',   status: ContentStatus.pending),
+    (label: 'En curso',    status: ContentStatus.inProgress),
+    (label: 'Completado',  status: ContentStatus.completed),
+    (label: 'Abandonado',  status: ContentStatus.dropped),
+  ];
+
+  static const _scores = [
+    (label: 'Sin filtro', score: null as double?),
+    (label: '≥ 2 ★',     score: 4.0),
+    (label: '≥ 3 ★',     score: 6.0),
+    (label: '≥ 4 ★',     score: 8.0),
+    (label: 'Solo 5 ★',  score: 10.0),
+  ];
+
+  void _apply() {
+    widget.onTypeChanged(_type);
+    widget.onStatusChanged(_status);
+    widget.onScoreChanged(_score);
+    Navigator.of(context).pop();
+  }
+
+  void _clear() {
+    widget.onClear();
+    Navigator.of(context).pop();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final hasLocal = _type != null || _status != null || _score != null;
+
+    return Container(
+      margin: const EdgeInsets.only(top: 80),
+      decoration: BoxDecoration(
+        color: Theme.of(context).cardTheme.color,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      child: Column(
+        children: [
+          // Handle
+          const SizedBox(height: 12),
+          Container(
+            width: 36, height: 4,
+            decoration: BoxDecoration(
+              color: Theme.of(context).dividerColor,
+              borderRadius: BorderRadius.circular(2),
+            ),
+          ),
+          const SizedBox(height: 16),
+
+          // Header
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: Row(children: [
+              Text('Filtros',
+                  style: AppTextStyles.titleMd.copyWith(
+                      color: Theme.of(context).colorScheme.onSurface)),
+              const Spacer(),
+              if (hasLocal)
+                TextButton(
+                  onPressed: () => setState(() {
+                    _type   = null;
+                    _status = null;
+                    _score  = null;
+                  }),
+                  child: Text('Limpiar todo',
+                      style: AppTextStyles.labelMd.copyWith(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant)),
+                ),
+            ]),
+          ),
+          const Divider(height: 1),
+
+          // Scrollable content
+          Expanded(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.fromLTRB(20, 20, 20, 16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // ── Tipo ──────────────────────────────────────────────
+                  _SectionLabel('Tipo de contenido'),
+                  const SizedBox(height: 10),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: _types.map((t) => _Chip(
+                      label: t.label,
+                      selected: _type == t.type,
+                      onTap: () => setState(() => _type = t.type),
+                    )).toList(),
+                  ),
+                  const SizedBox(height: 24),
+
+                  // ── Estado ────────────────────────────────────────────
+                  _SectionLabel('Estado'),
+                  const SizedBox(height: 10),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: _statuses.map((s) => _Chip(
+                      label: s.label,
+                      selected: _status == s.status,
+                      onTap: () => setState(() => _status = s.status),
+                    )).toList(),
+                  ),
+                  const SizedBox(height: 24),
+
+                  // ── Puntuación ────────────────────────────────────────
+                  _SectionLabel('Puntuación mínima'),
+                  const SizedBox(height: 10),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: _scores.map((sc) => _Chip(
+                      label: sc.label,
+                      selected: _score == sc.score,
+                      onTap: () => setState(() => _score = sc.score),
+                    )).toList(),
+                  ),
+                  const SizedBox(height: 32),
+                ],
+              ),
+            ),
+          ),
+
+          // Apply button
+          SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
+              child: GestureDetector(
+                onTap: _apply,
+                child: Container(
+                  width: double.infinity,
+                  height: 52,
+                  decoration: BoxDecoration(
+                    gradient: AppColors.gradientH,
+                    borderRadius: BorderRadius.circular(28),
+                    boxShadow: [
+                      BoxShadow(
+                        color: AppColors.blue.withValues(alpha: 0.35),
+                        blurRadius: 16,
+                        offset: const Offset(0, 6),
+                      ),
+                    ],
+                  ),
+                  child: Center(
+                    child: Text(
+                      hasLocal ? 'Aplicar filtros' : 'Ver todos',
+                      style: AppTextStyles.titleMd.copyWith(
+                          color: Colors.white),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ── Chip inside panel ─────────────────────────────────────────────────────
+
+class _Chip extends StatelessWidget {
   final String label;
   final bool selected;
   final VoidCallback onTap;
-  final bool isStatus;
-  const _FilterChip({
-    required this.label,
-    required this.selected,
-    required this.onTap,
-    this.isStatus = false,
-  });
+  const _Chip({required this.label, required this.selected, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onTap,
       child: AnimatedContainer(
-        duration: const Duration(milliseconds: 180),
+        duration: const Duration(milliseconds: 160),
         curve: Curves.easeOut,
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 9),
         decoration: BoxDecoration(
           gradient: selected ? AppColors.gradientH : null,
-          color: selected
-              ? null
-              : isStatus
-                  ? Theme.of(context).colorScheme.surface.withValues(alpha: 0.5)
-                  : Theme.of(context).colorScheme.surface,
+          color: selected ? null : Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
             color: selected
                 ? Colors.transparent
-                : Theme.of(context).dividerColor.withValues(alpha: isStatus ? 0.5 : 1.0),
-            width: 1,
+                : Theme.of(context).dividerColor,
           ),
         ),
         child: Text(
@@ -391,8 +533,7 @@ class _FilterChip extends StatelessWidget {
           style: AppTextStyles.labelMd.copyWith(
             color: selected
                 ? Colors.white
-                : Theme.of(context).colorScheme.onSurface.withValues(
-                    alpha: isStatus ? 0.65 : 1.0),
+                : Theme.of(context).colorScheme.onSurface,
             fontWeight: selected ? FontWeight.w600 : FontWeight.normal,
           ),
         ),
@@ -401,8 +542,27 @@ class _FilterChip extends StatelessWidget {
   }
 }
 
+// ── Section label ─────────────────────────────────────────────────────────
 
-// ── FAB con gradiente ──────────────────────────────────────────────────────
+class _SectionLabel extends StatelessWidget {
+  final String text;
+  const _SectionLabel(this.text);
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      text.toUpperCase(),
+      style: AppTextStyles.labelSm.copyWith(
+        color: AppColors.cyan,
+        fontWeight: FontWeight.w700,
+        letterSpacing: 1.1,
+      ),
+    );
+  }
+}
+
+// ── Gradient FAB ──────────────────────────────────────────────────────────
+
 class _GradientFAB extends StatefulWidget {
   final VoidCallback onTap;
   final VoidCallback onLongPress;
@@ -426,7 +586,7 @@ class _GradientFABState extends State<_GradientFAB>
       lowerBound: 0,
       upperBound: 0.06,
     );
-    _scale = Tween<double>(begin: 1.0, end: 0.94).animate(
+    _scale = Tween<double>(begin: 1.0, end: 0.92).animate(
       CurvedAnimation(parent: _ctrl, curve: Curves.easeOut),
     );
   }
@@ -474,7 +634,8 @@ class _GradientFABState extends State<_GradientFAB>
   }
 }
 
-// ── Empty state ────────────────────────────────────────────────────────────
+// ── Empty state ───────────────────────────────────────────────────────────
+
 class _EmptyState extends StatelessWidget {
   final bool hasFilter;
   const _EmptyState({this.hasFilter = false});
