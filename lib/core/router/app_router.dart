@@ -27,16 +27,16 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         ],
       ),
       GoRoute(
+        path: '/content/new',
+        builder: (_, __) => const ContentFormPage(),
+      ),
+      GoRoute(
         path: '/content/:id',
         builder: (context, state) {
           final id = int.tryParse(state.pathParameters['id'] ?? '');
           if (id == null) return const _NotFoundPage();
           return ContentDetailPage(id: id);
         },
-      ),
-      GoRoute(
-        path: '/content/new',
-        builder: (_, __) => const ContentFormPage(),
       ),
       GoRoute(
         path: '/content/:id/edit',
