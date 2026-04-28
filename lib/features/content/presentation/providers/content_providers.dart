@@ -74,6 +74,12 @@ final contentListProvider = FutureProvider<List<ContentItem>>((ref) {
   );
 });
 
+/// Items marcados como favoritos. Usado por el Baúl › Favoritos.
+final favoriteItemsProvider = FutureProvider<List<ContentItem>>((ref) {
+  final repo = ref.watch(contentRepositoryProvider);
+  return repo.getAll(filterFavorite: true);
+});
+
 // ─── Item individual ──────────────────────────────────────────────
 
 /// Provider parametrizado por id para la pantalla de detalle/edición.
@@ -105,6 +111,7 @@ final toggleFavoriteProvider =
     await repo.update(updated);
     ref.invalidate(contentListProvider);
     ref.invalidate(contentItemProvider(item.id!));
+    ref.invalidate(favoriteItemsProvider); // refresh vault favorites tab
   };
 });
 

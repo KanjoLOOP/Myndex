@@ -7,6 +7,10 @@ import '../../../content/presentation/providers/content_providers.dart';
 import '../../data/datasources/collection_local_datasource.dart';
 import '../../domain/entities/collection.dart';
 
+// Re-export so existing imports of favoriteItemsProvider from vault_providers still work.
+export '../../../content/presentation/providers/content_providers.dart'
+    show favoriteItemsProvider;
+
 // ─── Datasource ────────────────────────────────────────────────────
 
 final collectionDatasourceProvider = Provider<CollectionLocalDatasource>(
@@ -21,11 +25,8 @@ final completedItemsProvider = FutureProvider<List<ContentItem>>((ref) {
   return repo.getAll(filterStatus: ContentStatus.completed);
 });
 
-/// Todos los items favoritos (tab Favoritos).
-final favoriteItemsProvider = FutureProvider<List<ContentItem>>((ref) {
-  final repo = ref.watch(contentRepositoryProvider);
-  return repo.getAll(filterFavorite: true);
-});
+// favoriteItemsProvider is defined in content_providers.dart and re-exported above.
+// This avoids a duplicate and ensures toggleFavoriteProvider can invalidate it.
 
 /// Todas las colecciones con su conteo de items.
 final collectionsProvider = FutureProvider<List<Collection>>((ref) {
