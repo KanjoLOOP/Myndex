@@ -71,25 +71,21 @@ class InputSanitizer {
     return trimmed;
   }
 
-  /// Sanea la cadena de búsqueda: recorta, limita y escapa los
-  /// comodines de SQL LIKE para que el usuario no pueda usar `%` o `_`
-  /// y forzar barridos de toda la tabla.
+  /// Sanea la cadena de búsqueda para uso con FTS5 (SQLite).
+  ///
+  /// - Recorta y limita la longitud máxima.
+  /// - Elimina los operadores especiales de FTS5 (`"`, `*`, `^`, `-`,
+  ///   `(`, `)`, `:`) que el usuario no debería poder inyectar.
+  ///   Esto evita que una búsqueda como `"*"` o `NOT token` ejecute
+  ///   lógica booleana no intencionada.
+  /// - No se aplica escape de LIKE porque la query usa MATCH, no LIKE.
   static String sanitizeSearchQuery(String raw) {
     final trimmed = raw.trim();
-    if (trimmed.length > maxQueryLength) {
-      return _escapeLike(trimmed.substring(0, maxQueryLength));
-    }
-    return _escapeLike(trimmed);
-  }
-
-  /// Escapa los comodines de LIKE en SQLite usando `\` como carácter
-  /// de escape. El uso del carácter de escape se declara con
-  /// `ESCAPE '\'` en la query.
-  static String _escapeLike(String input) {
-    return input
-        .replaceAll(r'\', r'\\')
-        .replaceAll('%', r'\%')
-        .replaceAll('_', r'\_');
+    final limited = trimmed.length > maxQueryLength
+        ? trimmed.substring(0, maxQueryLength)
+        : trimmed;
+    // Strip FTS5 special operators to prevent query injection.
+    return limited.replaceAll(RegExp(r'[%"\*\^\-\(\):]'), '');
   }
 
   /// Valida que la puntuación esté en el rango permitido (0..10).

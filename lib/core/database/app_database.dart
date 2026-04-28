@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:drift/drift.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -20,7 +21,26 @@ part 'app_database.g.dart';
 ///   personal sensible, valorar SQLCipher (sqlite3_flutter_libs lo
 ///   soporta) y proteger la clave con secure storage.
 
+// ─── Type Converters ────────────────────────────────────────────────
+
+class RatingDimensionsConverter extends TypeConverter<Map<String, int>, String> {
+  const RatingDimensionsConverter();
+
+  @override
+  Map<String, int> fromSql(String fromDb) {
+    if (fromDb.isEmpty) return {};
+    final map = jsonDecode(fromDb) as Map<String, dynamic>;
+    return map.map((k, v) => MapEntry(k, v as int));
+  }
+
+  @override
+  String toSql(Map<String, int> value) {
+    return jsonEncode(value);
+  }
+}
+
 // ─── Tablas ───────────────────────────────────────────────────────
+
 
 /// Tabla principal de contenido.
 ///
@@ -38,6 +58,11 @@ class ContentItems extends Table {
   TextColumn get genre => text().nullable()();            // género(s) libre, ej. "Acción, Aventura"
   TextColumn get externalId => text().nullable()();      // id de TMDB/RAWG/etc.
   TextColumn get externalSource => text().nullable()();  // 'tmdb','rawg','openlibrary'
+  IntColumn get estimatedDurationMinutes => integer().nullable()();
+  TextColumn get ratingDimensions => text().map(const RatingDimensionsConverter()).nullable()();
+  DateTimeColumn get completedAt => dateTime().nullable()();
+  IntColumn get progressUnits => integer().nullable()();
+  IntColumn get totalUnits => integer().nullable()();
   BoolColumn get isFavorite => boolean().withDefault(const Constant(false))();
   DateTimeColumn get addedAt => dateTime().withDefault(currentDateAndTime)();
   DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
@@ -59,9 +84,26 @@ class CollectionItems extends Table {
   Set<Column> get primaryKey => {collectionId, contentItemId};
 }
 
+/// Registro de actividad para timeline y estadísticas.
+class ActivityLog extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  IntColumn get contentId => integer()();
+  TextColumn get action => text()(); // 'added', 'updated', 'completed', 'status_changed'
+  DateTimeColumn get timestamp => dateTime().withDefault(currentDateAndTime)();
+}
+
+/// Tabla virtual para búsqueda rápida (FTS5)
+class SearchIndex extends Table {
+  IntColumn get contentId => integer()();
+  TextColumn get title => text()();
+  
+  @override
+  String get tableName => 'search_index';
+}
+
 // ─── Base de datos ────────────────────────────────────────────────
 
-@DriftDatabase(tables: [ContentItems, Collections, CollectionItems])
+@DriftDatabase(tables: [ContentItems, Collections, CollectionItems, ActivityLog, SearchIndex])
 class AppDatabase extends _$AppDatabase {
   AppDatabase(super.executor);
 
@@ -73,6 +115,30 @@ class AppDatabase extends _$AppDatabase {
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
+    onCreate: (migrator) async {
+      await migrator.createAll();
+      // Drop and create FTS5 virtual table properly since drift might just create a normal table for SearchIndex
+      await customStatement('DROP TABLE IF EXISTS search_index');
+      await customStatement('CREATE VIRTUAL TABLE search_index USING fts5(title, contentId UNINDEXED)');
+      
+      // Triggers for FTS5
+      await customStatement('''
+        CREATE TRIGGER IF NOT EXISTS search_index_insert AFTER INSERT ON content_items BEGIN
+          INSERT INTO search_index (title, contentId) VALUES (new.title, new.id);
+        END;
+      ''');
+      await customStatement('''
+        CREATE TRIGGER IF NOT EXISTS search_index_delete AFTER DELETE ON content_items BEGIN
+          DELETE FROM search_index WHERE contentId = old.id;
+        END;
+      ''');
+      await customStatement('''
+        CREATE TRIGGER IF NOT EXISTS search_index_update AFTER UPDATE ON content_items BEGIN
+          DELETE FROM search_index WHERE contentId = old.id;
+          INSERT INTO search_index (title, contentId) VALUES (new.title, new.id);
+        END;
+      ''');
+    },
     onUpgrade: (migrator, from, to) async {
       if (from < 2) {
         await migrator.addColumn(contentItems, contentItems.genre);
@@ -81,6 +147,38 @@ class AppDatabase extends _$AppDatabase {
         await migrator.addColumn(contentItems, contentItems.isFavorite);
         await migrator.createTable(collections);
         await migrator.createTable(collectionItems);
+      }
+      if (from < 4) {
+        await migrator.addColumn(contentItems, contentItems.estimatedDurationMinutes);
+        await migrator.addColumn(contentItems, contentItems.ratingDimensions);
+        await migrator.addColumn(contentItems, contentItems.completedAt);
+        await migrator.addColumn(contentItems, contentItems.progressUnits);
+        await migrator.addColumn(contentItems, contentItems.totalUnits);
+        await migrator.createTable(activityLog);
+        
+        await customStatement('DROP TABLE IF EXISTS search_index');
+        await customStatement('CREATE VIRTUAL TABLE search_index USING fts5(title, contentId UNINDEXED)');
+        
+        // Triggers for FTS5
+        await customStatement('''
+          CREATE TRIGGER IF NOT EXISTS search_index_insert AFTER INSERT ON content_items BEGIN
+            INSERT INTO search_index (title, contentId) VALUES (new.title, new.id);
+          END;
+        ''');
+        await customStatement('''
+          CREATE TRIGGER IF NOT EXISTS search_index_delete AFTER DELETE ON content_items BEGIN
+            DELETE FROM search_index WHERE contentId = old.id;
+          END;
+        ''');
+        await customStatement('''
+          CREATE TRIGGER IF NOT EXISTS search_index_update AFTER UPDATE ON content_items BEGIN
+            DELETE FROM search_index WHERE contentId = old.id;
+            INSERT INTO search_index (title, contentId) VALUES (new.title, new.id);
+          END;
+        ''');
+        
+        // Populate FTS5 table
+        await customStatement('INSERT INTO search_index (title, contentId) SELECT title, id FROM content_items');
       }
     },
   );

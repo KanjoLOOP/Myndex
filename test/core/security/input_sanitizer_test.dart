@@ -117,23 +117,23 @@ void main() {
   });
 
   group('InputSanitizer.sanitizeSearchQuery', () {
-    test('escape % wildcard', () {
-      expect(InputSanitizer.sanitizeSearchQuery('%test%'), r'\%test\%');
+    test('strips % wildcard (FTS5 special char)', () {
+      expect(InputSanitizer.sanitizeSearchQuery('%test%'), 'test');
     });
 
-    test('escape _ wildcard', () {
-      expect(InputSanitizer.sanitizeSearchQuery('test_value'), r'test\_value');
+    test('strips FTS5 operators (* ^ - : ")', () {
+      expect(InputSanitizer.sanitizeSearchQuery('*test-value"'), 'testvalue');
     });
 
-    test('escape backslash', () {
-      expect(InputSanitizer.sanitizeSearchQuery(r'test\value'), r'test\\value');
+    test('preserves underscore (valid in FTS5 terms)', () {
+      expect(InputSanitizer.sanitizeSearchQuery('test_value'), 'test_value');
     });
 
     test('trim query', () {
       expect(InputSanitizer.sanitizeSearchQuery('  hello  '), 'hello');
     });
 
-    test('truncate at maxQueryLength and escape', () {
+    test('truncate at maxQueryLength and strip', () {
       final long = 'a' * (InputSanitizer.maxQueryLength + 50);
       final result = InputSanitizer.sanitizeSearchQuery(long);
       expect(result.length, lessThanOrEqualTo(InputSanitizer.maxQueryLength));

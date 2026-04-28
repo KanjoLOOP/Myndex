@@ -53,6 +53,21 @@ class ContentItem {
   /// Origen del enriquecimiento: 'tmdb', 'rawg', 'openlibrary'…
   final String? externalSource;
 
+  /// Duración estimada (minutos, páginas, tiempo en juego).
+  final int? estimatedDurationMinutes;
+
+  /// Dimensiones de puntuación (ej. {"historia": 9, "gameplay": 8}).
+  final Map<String, int>? ratingDimensions;
+
+  /// Fecha en que se completó el ítem.
+  final DateTime? completedAt;
+
+  /// Unidades de progreso actual (episodios, capítulos).
+  final int? progressUnits;
+
+  /// Total de unidades (episodios, capítulos).
+  final int? totalUnits;
+
   /// Fecha en la que el usuario añadió el ítem a la biblioteca.
   /// **No se modifica al actualizar.**
   final DateTime addedAt;
@@ -71,6 +86,11 @@ class ContentItem {
     this.imageUrl,
     this.externalId,
     this.externalSource,
+    this.estimatedDurationMinutes,
+    this.ratingDimensions,
+    this.completedAt,
+    this.progressUnits,
+    this.totalUnits,
     this.isFavorite = false,
     required this.addedAt,
     required this.updatedAt,
@@ -88,6 +108,11 @@ class ContentItem {
     String? imageUrl,
     String? externalId,
     String? externalSource,
+    int? estimatedDurationMinutes,
+    Map<String, int>? ratingDimensions,
+    DateTime? completedAt,
+    int? progressUnits,
+    int? totalUnits,
     bool? isFavorite,
     DateTime? addedAt,
     DateTime? updatedAt,
@@ -97,6 +122,8 @@ class ContentItem {
     bool clearImageUrl = false,
     bool clearExternalId = false,
     bool clearExternalSource = false,
+    bool clearRatingDimensions = false,
+    bool clearCompletedAt = false,
   }) {
     return ContentItem(
       id: id ?? this.id,
@@ -110,6 +137,11 @@ class ContentItem {
       externalId: clearExternalId ? null : (externalId ?? this.externalId),
       externalSource:
           clearExternalSource ? null : (externalSource ?? this.externalSource),
+      estimatedDurationMinutes: estimatedDurationMinutes ?? this.estimatedDurationMinutes,
+      ratingDimensions: clearRatingDimensions ? null : (ratingDimensions ?? this.ratingDimensions),
+      completedAt: clearCompletedAt ? null : (completedAt ?? this.completedAt),
+      progressUnits: progressUnits ?? this.progressUnits,
+      totalUnits: totalUnits ?? this.totalUnits,
       isFavorite: isFavorite ?? this.isFavorite,
       addedAt: addedAt ?? this.addedAt,
       updatedAt: updatedAt ?? this.updatedAt,
@@ -132,6 +164,11 @@ class ContentItem {
         'imageUrl': imageUrl,
         'externalId': externalId,
         'externalSource': externalSource,
+        'estimatedDurationMinutes': estimatedDurationMinutes,
+        'ratingDimensions': ratingDimensions,
+        'completedAt': completedAt?.toIso8601String(),
+        'progressUnits': progressUnits,
+        'totalUnits': totalUnits,
         'isFavorite': isFavorite,
         'addedAt': addedAt.toIso8601String(),
         'updatedAt': updatedAt.toIso8601String(),
@@ -192,6 +229,13 @@ class ContentItem {
       imageUrl: json['imageUrl'] as String?,
       externalId: json['externalId'] as String?,
       externalSource: json['externalSource'] as String?,
+      estimatedDurationMinutes: json['estimatedDurationMinutes'] as int?,
+      ratingDimensions: (json['ratingDimensions'] as Map<String, dynamic>?)?.map(
+        (k, v) => MapEntry(k, v as int),
+      ),
+      completedAt: json['completedAt'] != null ? parseDate(json['completedAt'], 'completedAt') : null,
+      progressUnits: json['progressUnits'] as int?,
+      totalUnits: json['totalUnits'] as int?,
       isFavorite: json['isFavorite'] as bool? ?? false,
       addedAt: parseDate(json['addedAt'], 'addedAt'),
       updatedAt: parseDate(json['updatedAt'], 'updatedAt'),

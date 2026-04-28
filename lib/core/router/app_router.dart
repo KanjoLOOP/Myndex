@@ -4,10 +4,12 @@ import 'package:go_router/go_router.dart';
 
 import '../../features/content/presentation/pages/content_detail_page.dart';
 import '../../features/content/presentation/pages/content_form_page.dart';
+import '../../features/content/presentation/pages/smart_backlog_page.dart';
 import '../../features/home/presentation/pages/home_page.dart';
 import '../../features/search/presentation/pages/search_page.dart';
 import '../../features/settings/presentation/pages/settings_page.dart';
 import '../../features/stats/presentation/pages/stats_page.dart';
+import '../../features/timeline/presentation/pages/timeline_page.dart';
 import '../../features/vault/presentation/pages/collection_detail_page.dart';
 import '../../features/vault/presentation/pages/vault_page.dart';
 
@@ -55,6 +57,14 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/stats',
         builder: (_, __) => const StatsPage(),
+      ),
+      GoRoute(
+        path: '/smart-backlog',
+        builder: (_, __) => const SmartBacklogPage(),
+      ),
+      GoRoute(
+        path: '/timeline',
+        builder: (_, __) => const TimelinePage(),
       ),
     ],
   );

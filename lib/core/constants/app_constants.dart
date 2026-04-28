@@ -11,7 +11,7 @@ class AppConstants {
 
   // Base de datos local (Drift)
   static const String dbName = 'myndex';
-  static const int dbVersion = 3;
+  static const int dbVersion = 4;
 
   // TMDB (The Movie Database) — películas y series
   static const String tmdbBaseUrl = 'https://api.themoviedb.org/3';

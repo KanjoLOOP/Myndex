@@ -61,8 +61,11 @@ class ContentLocalDatasource {
 
   /// Inserta un nuevo item. Devuelve la entidad con el id asignado.
   Future<ContentItem> insert(ContentItem item) async {
-    final id = await _db.into(_db.contentItems).insert(item.toInsertCompanion());
-    return item.copyWith(id: id);
+    return _db.transaction(() async {
+      final id = await _db.into(_db.contentItems).insert(item.toInsertCompanion());
+      await _logActivity(id, 'added');
+      return item.copyWith(id: id);
+    });
   }
 
   /// Actualiza un item existente. Conserva el `addedAt` original
@@ -73,33 +76,45 @@ class ContentLocalDatasource {
     if (item.id == null) {
       throw StateError('No se puede actualizar un item sin id');
     }
-    await (_db.update(_db.contentItems)..where((t) => t.id.equals(item.id!)))
-        .write(item.toUpdateCompanion());
-    return item;
+    return _db.transaction(() async {
+      final old = await getById(item.id!);
+      await (_db.update(_db.contentItems)..where((t) => t.id.equals(item.id!)))
+          .write(item.toUpdateCompanion());
+      
+      if (old != null) {
+        if (old.status != item.status) {
+          if (item.status == ContentStatus.completed) {
+            await _logActivity(item.id!, 'completed');
+          } else {
+            await _logActivity(item.id!, 'status_changed');
+          }
+        } else {
+          await _logActivity(item.id!, 'updated');
+        }
+      }
+      return item;
+    });
   }
 
   /// Borra un item por id.
   Future<void> delete(int id) async {
-    await (_db.delete(_db.contentItems)..where((t) => t.id.equals(id))).go();
+    return _db.transaction(() async {
+      await _logActivity(id, 'deleted');
+      await (_db.delete(_db.contentItems)..where((t) => t.id.equals(id))).go();
+    });
   }
 
-  /// Búsqueda local por título.
-  ///
-  /// La query del usuario se sanea (escape de `%` y `_`, recorte de
-  /// longitud) antes de embeberla en el patrón LIKE. La consulta se
-  /// emite como `customSelect` parametrizada para poder declarar el
-  /// `ESCAPE '\\'`, que Drift no expone en su DSL de alto nivel.
   Future<List<ContentItem>> search(String query) async {
     final sanitized = InputSanitizer.sanitizeSearchQuery(query);
     if (sanitized.isEmpty) return const [];
 
-    final pattern = '%$sanitized%';
     final raw = await _db.customSelect(
-      "SELECT * FROM content_items "
-      "WHERE title LIKE ? ESCAPE '\\' "
-      "ORDER BY added_at DESC",
-      variables: [Variable.withString(pattern)],
-      readsFrom: {_db.contentItems},
+      "SELECT c.* FROM search_index s "
+      "JOIN content_items c ON s.contentId = c.id "
+      "WHERE search_index MATCH ? "
+      "ORDER BY rank",
+      variables: [Variable.withString('$sanitized*')],
+      readsFrom: {_db.searchIndex, _db.contentItems},
     ).get();
 
     return raw
@@ -142,5 +157,21 @@ class ContentLocalDatasource {
       }
       return count;
     });
+  }
+
+  Future<void> _logActivity(int contentId, String action) async {
+    await _db.into(_db.activityLog).insert(
+      ActivityLogCompanion.insert(
+        contentId: contentId,
+        action: action,
+        timestamp: Value(DateTime.now()),
+      ),
+    );
+  }
+
+  Future<List<ActivityLogData>> getActivityLog() async {
+    return (_db.select(_db.activityLog)
+          ..orderBy([(t) => OrderingTerm.desc(t.timestamp)]))
+        .get();
   }
 }

@@ -1,3 +1,4 @@
+import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -14,6 +15,7 @@ class StatsPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final async = ref.watch(libraryStatsProvider);
+    final activityAsync = ref.watch(activityLogProvider);
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
@@ -24,6 +26,20 @@ class StatsPage extends ConsumerWidget {
           onPressed: () => context.pop(),
         ),
         title: Text('Estadísticas', style: AppTextStyles.titleLg),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.timeline_outlined),
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+            tooltip: 'Mi Timeline',
+            onPressed: () => context.push('/timeline'),
+          ),
+          IconButton(
+            icon: const Icon(Icons.watch_later_outlined),
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+            tooltip: 'Smart Backlog',
+            onPressed: () => context.push('/smart-backlog'),
+          ),
+        ],
       ),
       body: async.when(
         loading: () => const Center(
@@ -31,7 +47,10 @@ class StatsPage extends ConsumerWidget {
         error: (e, _) => const Center(child: Text('No se pudieron cargar las estadísticas')),
         data: (stats) => stats.total == 0
             ? _EmptyStats()
-            : _StatsBody(stats: stats),
+            : _StatsBody(
+                stats: stats,
+                activityLog: activityAsync.valueOrNull ?? [],
+              ),
       ),
     );
   }
@@ -71,7 +90,8 @@ class _EmptyStats extends StatelessWidget {
 
 class _StatsBody extends StatelessWidget {
   final LibraryStats stats;
-  const _StatsBody({required this.stats});
+  final List<dynamic> activityLog;
+  const _StatsBody({required this.stats, required this.activityLog});
 
   @override
   Widget build(BuildContext context) {
@@ -125,6 +145,14 @@ class _StatsBody extends StatelessWidget {
         ]),
 
         const SizedBox(height: 24),
+        
+        // ── Actividad reciente ─────────────────────────────────────────
+        if (activityLog.isNotEmpty) ...[
+          _SectionTitle('Actividad Reciente (7 días)'),
+          const SizedBox(height: 12),
+          _ActivityChart(activityLog: activityLog),
+          const SizedBox(height: 24),
+        ],
 
         // ── Score medio ───────────────────────────────────────────────
         if (stats.averageScore != null) ...[
@@ -495,6 +523,90 @@ class _SectionTitle extends StatelessWidget {
       style: AppTextStyles.labelMd.copyWith(
         letterSpacing: 1.2,
         color: Theme.of(context).colorScheme.onSurfaceVariant,
+      ),
+    );
+  }
+}
+
+// ── Activity Chart (fl_chart) ───────────────────────────────────────────────
+
+class _ActivityChart extends StatelessWidget {
+  final List<dynamic> activityLog;
+  const _ActivityChart({required this.activityLog});
+
+  @override
+  Widget build(BuildContext context) {
+    // Group activity by day for the last 7 days
+    final now = DateTime.now();
+    final counts = List.filled(7, 0);
+    
+    for (final log in activityLog) {
+      final timestamp = log.timestamp as DateTime;
+      final diff = now.difference(timestamp).inDays;
+      if (diff >= 0 && diff < 7) {
+        counts[6 - diff]++;
+      }
+    }
+
+    final maxY = counts.isEmpty ? 1.0 : counts.reduce((a, b) => a > b ? a : b).toDouble();
+    final actualMaxY = maxY < 5 ? 5.0 : maxY;
+
+    return Container(
+      height: 200,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Theme.of(context).cardTheme.color,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Theme.of(context).dividerColor),
+      ),
+      child: BarChart(
+        BarChartData(
+          alignment: BarChartAlignment.spaceAround,
+          maxY: actualMaxY,
+          minY: 0,
+          barTouchData: BarTouchData(enabled: false),
+          titlesData: FlTitlesData(
+            show: true,
+            bottomTitles: AxisTitles(
+              sideTitles: SideTitles(
+                showTitles: true,
+                getTitlesWidget: (value, meta) {
+                  final daysAgo = 6 - value.toInt();
+                  final date = now.subtract(Duration(days: daysAgo));
+                  final dayStr = ['L', 'M', 'X', 'J', 'V', 'S', 'D'][date.weekday - 1];
+                  return Padding(
+                    padding: const EdgeInsets.only(top: 8),
+                    child: Text(
+                      dayStr,
+                      style: AppTextStyles.labelSm.copyWith(
+                        color: value.toInt() == 6 ? AppColors.cyan : Theme.of(context).colorScheme.onSurfaceVariant,
+                        fontWeight: value.toInt() == 6 ? FontWeight.bold : FontWeight.normal,
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+            leftTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+            rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+            topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+          ),
+          gridData: const FlGridData(show: false),
+          borderData: FlBorderData(show: false),
+          barGroups: List.generate(7, (i) {
+            return BarChartGroupData(
+              x: i,
+              barRods: [
+                BarChartRodData(
+                  toY: counts[i].toDouble(),
+                  gradient: AppColors.gradientH,
+                  width: 16,
+                  borderRadius: const BorderRadius.vertical(top: Radius.circular(4)),
+                ),
+              ],
+            );
+          }),
+        ),
       ),
     );
   }

@@ -10,3 +10,8 @@ final libraryStatsProvider = FutureProvider<LibraryStats>((ref) async {
   final items = await repo.getAll();
   return LibraryStats.compute(items);
 });
+
+final activityLogProvider = FutureProvider<List<dynamic>>((ref) async {
+  final repo = ref.watch(contentRepositoryProvider);
+  return repo.getActivityLog();
+});

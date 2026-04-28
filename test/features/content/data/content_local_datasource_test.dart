@@ -188,9 +188,10 @@ void main() {
     });
 
     test('LIKE wildcard in query does not cause full scan exploit', () async {
-      // % should be escaped, not treated as wildcard by the user
+      // FTS5 special chars (%, *, etc.) are stripped by the sanitizer,
+      // leaving an empty query that returns no results.
       final results = await ds.search('%');
-      // Should return empty (no title literally contains \%)
+      // Should return empty – stripped to '' which early-exits
       expect(results, isEmpty);
     });
   });

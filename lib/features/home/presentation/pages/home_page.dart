@@ -8,6 +8,7 @@ import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/widgets/gradient_text.dart';
 import '../../../content/presentation/providers/content_providers.dart';
 import '../../../content/presentation/widgets/content_card.dart';
+import '../../../content/presentation/widgets/quick_add_sheet.dart';
 
 class HomePage extends ConsumerStatefulWidget {
   const HomePage({super.key});
@@ -153,6 +154,18 @@ class _HomePageState extends ConsumerState<HomePage> {
           ],
         ),
       ),
+    );
+  }
+
+  void _showQuickAddSheet() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Theme.of(context).cardTheme.color,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) => const QuickAddSheet(),
     );
   }
 
@@ -324,7 +337,7 @@ class _HomePageState extends ConsumerState<HomePage> {
         ],
       ),
       floatingActionButton: _GradientFAB(
-        onPressed: () => context.push('/content/new'),
+        onPressed: _showQuickAddSheet,
       ),
     );
   }

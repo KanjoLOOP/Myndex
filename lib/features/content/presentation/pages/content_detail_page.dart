@@ -11,6 +11,7 @@ import '../../../../core/widgets/gradient_button.dart';
 import '../../../vault/domain/entities/collection.dart';
 import '../../../vault/presentation/providers/vault_providers.dart';
 import '../providers/content_providers.dart';
+import '../widgets/radar_rating_chart.dart';
 
 class ContentDetailPage extends ConsumerWidget {
   final int id;
@@ -179,6 +180,32 @@ class ContentDetailPage extends ConsumerWidget {
                               color: Theme.of(context).colorScheme.onSurface)),
                       const SizedBox(height: 10),
                       _StarRating(score: item.score!),
+                      const SizedBox(height: 20),
+                    ],
+
+                    // ── Radar chart (multidimensional) ──────────────────
+                    if (item.ratingDimensions != null &&
+                        item.ratingDimensions!.isNotEmpty) ...[
+                      RadarRatingChart(
+                        dimensions: item.ratingDimensions!.map(
+                          (k, v) => MapEntry(k, (v as num).toDouble()),
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                    ],
+
+                    // ── Progreso ────────────────────────────────────────
+                    if (item.totalUnits != null && item.totalUnits! > 0) ...[
+                      _ProgressSection(
+                        current: item.progressUnits ?? 0,
+                        total: item.totalUnits!,
+                        label: item.type == ContentType.series ||
+                                item.type == ContentType.anime
+                            ? 'Episodios'
+                            : item.type == ContentType.book
+                                ? 'Páginas'
+                                : 'Unidades',
+                      ),
                       const SizedBox(height: 20),
                     ],
 
@@ -571,5 +598,57 @@ class _SectionHeader extends StatelessWidget {
           style: AppTextStyles.titleMd
               .copyWith(color: Theme.of(context).colorScheme.onSurface)),
     ]);
+  }
+}
+
+// ── Progress section ───────────────────────────────────────────────────────
+
+class _ProgressSection extends StatelessWidget {
+  final int current;
+  final int total;
+  final String label;
+  const _ProgressSection({
+    required this.current,
+    required this.total,
+    required this.label,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final ratio = (current / total).clamp(0.0, 1.0);
+    final pct = (ratio * 100).round();
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Theme.of(context).cardTheme.color,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Theme.of(context).dividerColor),
+      ),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Row(children: [
+          const Icon(Icons.timeline_outlined, size: 18, color: AppColors.cyan),
+          const SizedBox(width: 8),
+          Text('Progreso',
+              style: AppTextStyles.titleMd
+                  .copyWith(color: Theme.of(context).colorScheme.onSurface)),
+          const Spacer(),
+          Text(' /    (%)',
+              style: AppTextStyles.labelSm.copyWith(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant)),
+        ]),
+        const SizedBox(height: 12),
+        ClipRRect(
+          borderRadius: BorderRadius.circular(4),
+          child: LinearProgressIndicator(
+            value: ratio,
+            backgroundColor:
+                Theme.of(context).colorScheme.surface,
+            valueColor:
+                const AlwaysStoppedAnimation<Color>(AppColors.cyan),
+            minHeight: 8,
+          ),
+        ),
+      ]),
+    );
   }
 }

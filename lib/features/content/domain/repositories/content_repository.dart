@@ -43,4 +43,7 @@ abstract class ContentRepository {
     List<Map<String, dynamic>> data, {
     bool skipDuplicates = true,
   });
+
+  /// Recupera el registro de actividades.
+  Future<List<dynamic>> getActivityLog();
 }

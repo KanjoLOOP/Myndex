@@ -109,4 +109,7 @@ class ContentRepositoryImpl implements ContentRepository {
           (InputSanitizer.sanitizeScore(item.score) == null),
     );
   }
+
+  @override
+  Future<List<dynamic>> getActivityLog() => _local.getActivityLog();
 }
