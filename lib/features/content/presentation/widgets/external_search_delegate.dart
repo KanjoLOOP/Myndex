@@ -409,21 +409,11 @@ class _ThumbPlaceholder extends StatelessWidget {
   final ContentType type;
   const _ThumbPlaceholder(this.type);
 
-  IconData get icon => switch (type) {
-        ContentType.movie   => Icons.movie_outlined,
-        ContentType.series  => Icons.tv_outlined,
-        ContentType.book    => Icons.menu_book_outlined,
-        ContentType.game    => Icons.sports_esports_outlined,
-        ContentType.anime   => Icons.animation_outlined,
-        ContentType.podcast => Icons.podcasts_outlined,
-        ContentType.other   => Icons.category_outlined,
-      };
-
   @override
   Widget build(BuildContext context) {
     return Container(
       color: Theme.of(context).cardTheme.color,
-      child: Center(child: Icon(icon, size: 22, color: Theme.of(context).colorScheme.onSurfaceVariant)),
+      child: Center(child: Icon(type.icon, size: 22, color: Theme.of(context).colorScheme.onSurfaceVariant)),
     );
   }
 }

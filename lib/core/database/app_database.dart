@@ -23,6 +23,7 @@ part 'app_database.g.dart';
 
 // ─── Type Converters ────────────────────────────────────────────────
 
+/// Serializa/deserializa el mapa de dimensiones de puntuación a/desde JSON.
 class RatingDimensionsConverter extends TypeConverter<Map<String, int>, String> {
   const RatingDimensionsConverter();
 
@@ -92,11 +93,13 @@ class ActivityLog extends Table {
   DateTimeColumn get timestamp => dateTime().withDefault(currentDateAndTime)();
 }
 
-/// Tabla virtual para búsqueda rápida (FTS5)
+/// Tabla virtual para búsqueda rápida (FTS5).
+/// Drift no puede generar tablas virtuales: la creamos manualmente en
+/// [AppDatabase._setupFts5] y usamos esta clase solo para los tipos generados.
 class SearchIndex extends Table {
   IntColumn get contentId => integer()();
   TextColumn get title => text()();
-  
+
   @override
   String get tableName => 'search_index';
 }
@@ -117,27 +120,9 @@ class AppDatabase extends _$AppDatabase {
   MigrationStrategy get migration => MigrationStrategy(
     onCreate: (migrator) async {
       await migrator.createAll();
-      // Drop and create FTS5 virtual table properly since drift might just create a normal table for SearchIndex
-      await customStatement('DROP TABLE IF EXISTS search_index');
-      await customStatement('CREATE VIRTUAL TABLE search_index USING fts5(title, contentId UNINDEXED)');
-      
-      // Triggers for FTS5
-      await customStatement('''
-        CREATE TRIGGER IF NOT EXISTS search_index_insert AFTER INSERT ON content_items BEGIN
-          INSERT INTO search_index (title, contentId) VALUES (new.title, new.id);
-        END;
-      ''');
-      await customStatement('''
-        CREATE TRIGGER IF NOT EXISTS search_index_delete AFTER DELETE ON content_items BEGIN
-          DELETE FROM search_index WHERE contentId = old.id;
-        END;
-      ''');
-      await customStatement('''
-        CREATE TRIGGER IF NOT EXISTS search_index_update AFTER UPDATE ON content_items BEGIN
-          DELETE FROM search_index WHERE contentId = old.id;
-          INSERT INTO search_index (title, contentId) VALUES (new.title, new.id);
-        END;
-      ''');
+      // FTS5 no puede generarse con Drift: reemplazamos la tabla dummy
+      // por la tabla virtual real y sus triggers de sincronización.
+      await _setupFts5();
     },
     onUpgrade: (migrator, from, to) async {
       if (from < 2) {
@@ -155,33 +140,41 @@ class AppDatabase extends _$AppDatabase {
         await migrator.addColumn(contentItems, contentItems.progressUnits);
         await migrator.addColumn(contentItems, contentItems.totalUnits);
         await migrator.createTable(activityLog);
-        
-        await customStatement('DROP TABLE IF EXISTS search_index');
-        await customStatement('CREATE VIRTUAL TABLE search_index USING fts5(title, contentId UNINDEXED)');
-        
-        // Triggers for FTS5
-        await customStatement('''
-          CREATE TRIGGER IF NOT EXISTS search_index_insert AFTER INSERT ON content_items BEGIN
-            INSERT INTO search_index (title, contentId) VALUES (new.title, new.id);
-          END;
-        ''');
-        await customStatement('''
-          CREATE TRIGGER IF NOT EXISTS search_index_delete AFTER DELETE ON content_items BEGIN
-            DELETE FROM search_index WHERE contentId = old.id;
-          END;
-        ''');
-        await customStatement('''
-          CREATE TRIGGER IF NOT EXISTS search_index_update AFTER UPDATE ON content_items BEGIN
-            DELETE FROM search_index WHERE contentId = old.id;
-            INSERT INTO search_index (title, contentId) VALUES (new.title, new.id);
-          END;
-        ''');
-        
-        // Populate FTS5 table
-        await customStatement('INSERT INTO search_index (title, contentId) SELECT title, id FROM content_items');
+        await _setupFts5();
+        // Llena el índice con el contenido existente antes de la migración.
+        await customStatement(
+          'INSERT INTO search_index (title, contentId) SELECT title, id FROM content_items',
+        );
       }
     },
   );
+
+  /// Crea la tabla virtual FTS5 y los tres triggers que la mantienen
+  /// sincronizada con `content_items` (insert/delete/update).
+  /// Se llama en `onCreate` y en la migración a v4, por lo que
+  /// la lógica no está duplicada.
+  Future<void> _setupFts5() async {
+    await customStatement('DROP TABLE IF EXISTS search_index');
+    await customStatement(
+      'CREATE VIRTUAL TABLE search_index USING fts5(title, contentId UNINDEXED)',
+    );
+    await customStatement('''
+      CREATE TRIGGER IF NOT EXISTS search_index_insert AFTER INSERT ON content_items BEGIN
+        INSERT INTO search_index (title, contentId) VALUES (new.title, new.id);
+      END;
+    ''');
+    await customStatement('''
+      CREATE TRIGGER IF NOT EXISTS search_index_delete AFTER DELETE ON content_items BEGIN
+        DELETE FROM search_index WHERE contentId = old.id;
+      END;
+    ''');
+    await customStatement('''
+      CREATE TRIGGER IF NOT EXISTS search_index_update AFTER UPDATE ON content_items BEGIN
+        DELETE FROM search_index WHERE contentId = old.id;
+        INSERT INTO search_index (title, contentId) VALUES (new.title, new.id);
+      END;
+    ''');
+  }
 }
 
 // ─── Provider ─────────────────────────────────────────────────────

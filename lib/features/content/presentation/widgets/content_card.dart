@@ -6,27 +6,22 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../domain/entities/content_item.dart';
 
+/// Tarjeta de contenido mostrada en la cuadrícula principal.
+/// Muestra portada, título, estado, progreso y puntuación.
 class ContentCard extends StatelessWidget {
   final ContentItem item;
   final VoidCallback onTap;
 
   const ContentCard({super.key, required this.item, required this.onTap});
 
-  Color _statusColor(ContentStatus s) => switch (s) {
-        ContentStatus.pending    => AppColors.statusPending,
-        ContentStatus.inProgress => AppColors.statusInProgress,
-        ContentStatus.completed  => AppColors.statusCompleted,
-        ContentStatus.dropped    => AppColors.statusDropped,
-      };
-
-  /// Returns progress ratio 0..1 or null if no progress data.
+  /// Ratio de progreso de 0.0 a 1.0, o null si no hay datos de progreso.
   double? get _progressRatio {
     final total = item.totalUnits;
     if (total == null || total == 0) return null;
     return ((item.progressUnits ?? 0) / total).clamp(0.0, 1.0);
   }
 
-  /// Returns a short human-readable remaining time string, or null.
+  /// Texto legible del tiempo restante (p.ej. "2h 30m"), o null si no hay datos.
   String? get _remainingTime {
     final total = item.totalUnits;
     final dur   = item.estimatedDurationMinutes;
@@ -36,7 +31,7 @@ class ContentCard extends StatelessWidget {
     final remaining  = total - current;
     if (remaining <= 0) return null;
 
-    // Per-unit minutes = total duration / total units
+    // Minutos por unidad = duración total / unidades totales
     final minsLeft = (dur / total * remaining).round();
     if (minsLeft < 60) return '${minsLeft}min';
     final h = minsLeft ~/ 60;
@@ -150,25 +145,25 @@ class ContentCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 5),
                   Row(children: [
-                    // Status dot
+                    // Punto de color indicando el estado del item
                     Container(
                       width: 6, height: 6,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        color: _statusColor(item.status),
+                        color: item.status.color,
                       ),
                     ),
                     const SizedBox(width: 5),
                     Expanded(
                       child: Text(
-                        // Show "Ep. X/Y" when in progress with units
+                        // Muestra "X/Y" cuando está en progreso con unidades registradas
                         item.status == ContentStatus.inProgress &&
                                 item.progressUnits != null &&
                                 item.totalUnits != null
                             ? '${item.progressUnits}/${item.totalUnits}'
                             : item.status.label,
                         style: AppTextStyles.labelSm
-                            .copyWith(color: _statusColor(item.status)),
+                            .copyWith(color: item.status.color),
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
@@ -191,26 +186,18 @@ class ContentCard extends StatelessWidget {
   }
 }
 
+/// Placeholder cuando el item no tiene portada.
+/// Muestra el icono del tipo de contenido centrado.
 class _Placeholder extends StatelessWidget {
   final ContentType type;
   const _Placeholder(this.type);
-
-  IconData get icon => switch (type) {
-        ContentType.movie   => Icons.movie_outlined,
-        ContentType.series  => Icons.tv_outlined,
-        ContentType.book    => Icons.menu_book_outlined,
-        ContentType.game    => Icons.sports_esports_outlined,
-        ContentType.anime   => Icons.animation_outlined,
-        ContentType.podcast => Icons.podcasts_outlined,
-        ContentType.other   => Icons.category_outlined,
-      };
 
   @override
   Widget build(BuildContext context) {
     return Container(
       color: Theme.of(context).colorScheme.surface,
       child: Center(
-        child: Icon(icon, size: 40,
+        child: Icon(type.icon, size: 40,
             color: Theme.of(context).colorScheme.onSurfaceVariant),
       ),
     );

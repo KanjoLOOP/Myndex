@@ -236,6 +236,7 @@ class _ColeccionesTabState extends ConsumerState<_ColeccionesTab> {
                 itemBuilder: (_, i) {
                   final col = collections[i];
                   return GestureDetector(
+                    key: ValueKey(col.id),
                     onTap: () =>
                         context.push('/vault/collection/${col.id}'),
                     child: Container(
@@ -331,6 +332,7 @@ class _ContentGrid extends StatelessWidget {
       ),
       itemCount: items.length,
       itemBuilder: (ctx, i) => ContentCard(
+        key: ValueKey(items[i].id),
         item: items[i],
         onTap: () => ctx.push('/content/${items[i].id}'),
       ),

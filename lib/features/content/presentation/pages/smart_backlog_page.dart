@@ -175,6 +175,7 @@ class _SmartBacklogPageState extends ConsumerState<SmartBacklogPage> {
                     ),
                     itemCount: suggestions.length,
                     itemBuilder: (_, i) => ContentCard(
+                      key: ValueKey(suggestions[i].id),
                       item: suggestions[i],
                       onTap: () =>
                           context.push('/content/${suggestions[i].id}'),

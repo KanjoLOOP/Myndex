@@ -144,6 +144,7 @@ class _SearchPageState extends ConsumerState<SearchPage> {
       ),
       itemCount: _results.length,
       itemBuilder: (_, i) => ContentCard(
+        key: ValueKey(_results[i].id),
         item: _results[i],
         onTap: () => context.push('/content/${_results[i].id}'),
       ),

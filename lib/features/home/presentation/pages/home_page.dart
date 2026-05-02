@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/constants/content_types.dart';
+import '../../../../core/security/safe_error_message.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/widgets/gradient_text.dart';
@@ -18,62 +19,38 @@ class HomePage extends ConsumerStatefulWidget {
 }
 
 class _HomePageState extends ConsumerState<HomePage> {
-  ContentType?   _selectedType;
-  ContentStatus? _selectedStatus;
-  double?        _selectedMinScore;
-
-  bool get _hasFilter =>
-      _selectedType != null || _selectedStatus != null || _selectedMinScore != null;
-
-  int get _activeFilterCount => [
-        _selectedType,
-        _selectedStatus,
-        _selectedMinScore,
-      ].where((v) => v != null).length;
-
   // ── Filter helpers ────────────────────────────────────────────────────────
 
-  void _applyTypeFilter(ContentType? type) {
-    setState(() => _selectedType = type);
-    ref.read(filterStateProvider.notifier).update(
-          (s) => s.copyWith(type: type, clearType: type == null),
-        );
-  }
+  void _applyTypeFilter(ContentType? type) =>
+      ref.read(filterStateProvider.notifier).update(
+            (s) => s.copyWith(type: type, clearType: type == null),
+          );
 
-  void _applyStatusFilter(ContentStatus? status) {
-    setState(() => _selectedStatus = status);
-    ref.read(filterStateProvider.notifier).update(
-          (s) => s.copyWith(status: status, clearStatus: status == null),
-        );
-  }
+  void _applyStatusFilter(ContentStatus? status) =>
+      ref.read(filterStateProvider.notifier).update(
+            (s) => s.copyWith(status: status, clearStatus: status == null),
+          );
 
-  void _applyScoreFilter(double? minScore) {
-    setState(() => _selectedMinScore = minScore);
-    ref.read(filterStateProvider.notifier).update(
-          (s) => s.copyWith(minScore: minScore, clearScore: minScore == null),
-        );
-  }
+  void _applyScoreFilter(double? minScore) =>
+      ref.read(filterStateProvider.notifier).update(
+            (s) => s.copyWith(minScore: minScore, clearScore: minScore == null),
+          );
 
-  void _clearAllFilters() {
-    setState(() {
-      _selectedType     = null;
-      _selectedStatus   = null;
-      _selectedMinScore = null;
-    });
-    ref.read(filterStateProvider.notifier).update((_) => const FilterState());
-  }
+  void _clearAllFilters() =>
+      ref.read(filterStateProvider.notifier).update((_) => const FilterState());
 
   // ── Filter panel ──────────────────────────────────────────────────────────
 
   void _openFilterPanel() {
+    final filter = ref.read(filterStateProvider);
     showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (_) => _FilterPanel(
-        selectedType:     _selectedType,
-        selectedStatus:   _selectedStatus,
-        selectedMinScore: _selectedMinScore,
+        selectedType:     filter.type,
+        selectedStatus:   filter.status,
+        selectedMinScore: filter.minScore,
         onTypeChanged:    _applyTypeFilter,
         onStatusChanged:  _applyStatusFilter,
         onScoreChanged:   _applyScoreFilter,
@@ -103,6 +80,11 @@ class _HomePageState extends ConsumerState<HomePage> {
   @override
   Widget build(BuildContext context) {
     final asyncItems = ref.watch(contentListProvider);
+    final filter = ref.watch(filterStateProvider);
+    final hasFilter = filter.type != null || filter.status != null || filter.minScore != null;
+    final activeFilterCount = [filter.type, filter.status, filter.minScore]
+        .where((v) => v != null)
+        .length;
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -135,14 +117,14 @@ class _HomePageState extends ConsumerState<HomePage> {
               IconButton(
                 icon: Icon(
                   Icons.tune_rounded,
-                  color: _hasFilter
+                  color: hasFilter
                       ? AppColors.cyan
                       : Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
                 onPressed: _openFilterPanel,
                 tooltip: 'Filtros',
               ),
-              if (_hasFilter)
+              if (hasFilter)
                 Positioned(
                   top: 10,
                   right: 8,
@@ -155,7 +137,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                     ),
                     child: Center(
                       child: Text(
-                        '$_activeFilterCount',
+                        '$activeFilterCount',
                         style: const TextStyle(
                           color: Colors.white,
                           fontSize: 9,
@@ -174,7 +156,7 @@ class _HomePageState extends ConsumerState<HomePage> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // ── Active filter summary pill ────────────────────────────────
-          if (_hasFilter)
+          if (hasFilter)
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
               child: Row(children: [
@@ -182,19 +164,19 @@ class _HomePageState extends ConsumerState<HomePage> {
                   child: SingleChildScrollView(
                     scrollDirection: Axis.horizontal,
                     child: Row(children: [
-                      if (_selectedType != null)
+                      if (filter.type != null)
                         _ActiveFilterPill(
-                          label: _selectedType!.label,
+                          label: filter.type!.label,
                           onRemove: () => _applyTypeFilter(null),
                         ),
-                      if (_selectedStatus != null)
+                      if (filter.status != null)
                         _ActiveFilterPill(
-                          label: _selectedStatus!.label,
+                          label: filter.status!.label,
                           onRemove: () => _applyStatusFilter(null),
                         ),
-                      if (_selectedMinScore != null)
+                      if (filter.minScore != null)
                         _ActiveFilterPill(
-                          label: '≥ ${(_selectedMinScore! / 2).toStringAsFixed(0)} ★',
+                          label: '≥ ${(filter.minScore! / 2).toStringAsFixed(0)} ★',
                           onRemove: () => _applyScoreFilter(null),
                         ),
                     ]),
@@ -223,10 +205,10 @@ class _HomePageState extends ConsumerState<HomePage> {
                 child: CircularProgressIndicator(color: AppColors.cyan),
               ),
               error: (e, _) => Center(
-                child: Text('Error: $e', style: AppTextStyles.bodyMd),
+                child: Text(SafeErrorMessage.forUser(e), style: AppTextStyles.bodyMd),
               ),
               data: (items) => items.isEmpty
-                  ? _EmptyState(hasFilter: _hasFilter)
+                  ? _EmptyState(hasFilter: hasFilter)
                   : GridView.builder(
                       padding: const EdgeInsets.fromLTRB(16, 0, 16, 100),
                       gridDelegate:
@@ -238,6 +220,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                       ),
                       itemCount: items.length,
                       itemBuilder: (_, i) => ContentCard(
+                        key: ValueKey(items[i].id),
                         item: items[i],
                         onTap: () => context.push('/content/${items[i].id}'),
                       ),

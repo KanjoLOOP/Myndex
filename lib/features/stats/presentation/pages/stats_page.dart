@@ -343,13 +343,6 @@ class _StatusBars extends StatelessWidget {
     ContentStatus.dropped:    'Abandonado',
   };
 
-  static const _statusColors = {
-    ContentStatus.pending:    AppColors.statusPending,
-    ContentStatus.inProgress: AppColors.statusInProgress,
-    ContentStatus.completed:  AppColors.statusCompleted,
-    ContentStatus.dropped:    AppColors.statusDropped,
-  };
-
   @override
   Widget build(BuildContext context) {
     final entries = byStatus.entries.toList()
@@ -364,7 +357,8 @@ class _StatusBars extends StatelessWidget {
       ),
       child: Column(
         children: entries.map((e) {
-          final color = _statusColors[e.key] ?? AppColors.cyan;
+          // Usamos .color de la extensión en lugar de un mapa local duplicado
+          final color = e.key.color;
           final label = _statusLabels[e.key] ?? e.key.name;
           return Padding(
             padding: const EdgeInsets.only(bottom: 12),

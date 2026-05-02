@@ -18,19 +18,6 @@ class ContentDetailPage extends ConsumerWidget {
   final int id;
   const ContentDetailPage({super.key, required this.id});
 
-  Color _statusColor(ContentStatus s) => switch (s) {
-        ContentStatus.pending    => AppColors.statusPending,
-        ContentStatus.inProgress => AppColors.statusInProgress,
-        ContentStatus.completed  => AppColors.statusCompleted,
-        ContentStatus.dropped    => AppColors.statusDropped,
-      };
-
-  IconData _statusIcon(ContentStatus s) => switch (s) {
-        ContentStatus.pending    => Icons.schedule_outlined,
-        ContentStatus.inProgress => Icons.play_circle_outline,
-        ContentStatus.completed  => Icons.check_circle_outline,
-        ContentStatus.dropped    => Icons.cancel_outlined,
-      };
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -170,8 +157,8 @@ class ContentDetailPage extends ConsumerWidget {
 
                     _StatusBadge(
                       label: item.status.label,
-                      color: _statusColor(item.status),
-                      icon: _statusIcon(item.status),
+                      color: item.status.color,
+                      icon: item.status.statusIcon,
                     ),
                     const SizedBox(height: 20),
 
@@ -877,21 +864,11 @@ class _RecPlaceholder extends StatelessWidget {
   final ContentType type;
   const _RecPlaceholder(this.type);
 
-  IconData get icon => switch (type) {
-        ContentType.movie   => Icons.movie_outlined,
-        ContentType.series  => Icons.tv_outlined,
-        ContentType.book    => Icons.menu_book_outlined,
-        ContentType.game    => Icons.sports_esports_outlined,
-        ContentType.anime   => Icons.animation_outlined,
-        ContentType.podcast => Icons.podcasts_outlined,
-        ContentType.other   => Icons.category_outlined,
-      };
-
   @override
   Widget build(BuildContext context) => Container(
         color: Theme.of(context).colorScheme.surface,
         child: Center(
-          child: Icon(icon, size: 24,
+          child: Icon(type.icon, size: 24,
               color: Theme.of(context).colorScheme.onSurfaceVariant),
         ),
       );

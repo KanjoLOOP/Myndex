@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/constants/content_types.dart';
+import '../../../../core/security/safe_error_message.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../domain/entities/content_item.dart';
@@ -48,7 +49,7 @@ class _QuickAddSheetState extends ConsumerState<QuickAddSheet> {
       if (mounted) {
         setState(() => _isSaving = false);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e')),
+          SnackBar(content: Text(SafeErrorMessage.forUser(e))),
         );
       }
     }
