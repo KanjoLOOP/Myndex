@@ -4,17 +4,11 @@ import '../../../../core/constants/app_constants.dart';
 import '../../../../core/errors/failures.dart';
 import '../../../../core/security/input_sanitizer.dart';
 
-/// Datasource de Open Library (libros).
-///
-/// Open Library no requiere API key. Sus endpoints relevantes:
-/// - `GET /search.json?q=...` → lista de obras.
-/// - Cover por OLID/ISBN: `https://covers.openlibrary.org/b/<key>/<id>-L.jpg`.
 class OpenLibraryDatasource {
   final Dio _dio;
 
   OpenLibraryDatasource(this._dio);
 
-  /// Busca libros por título o autor.
   Future<List<Map<String, dynamic>>> searchBooks(String query) async {
     final q = query.trim();
     if (q.isEmpty) return const [];
@@ -42,8 +36,6 @@ class OpenLibraryDatasource {
     }
   }
 
-  /// Devuelve la URL de la portada usando el cover_i de Open Library.
-  /// Tamaños: S, M, L. Usamos L para detalle, M para listas.
   String? coverUrlFromCoverId(int? coverId, {String size = 'M'}) {
     if (coverId == null) return null;
     return '${AppConstants.openLibraryCoverBaseUrl}/b/id/$coverId-$size.jpg';
