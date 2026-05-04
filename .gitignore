@@ -73,3 +73,6 @@ Thumbs.db
 
 # Native libs that are downloaded by sqlite3_flutter_libs
 sqlite3.dll
+
+# Test artifacts
+test_output.txt

@@ -1,134 +1,175 @@
 <div align="center">
-  <h1>📚 Myndex</h1>
-  <p><strong>Tu biblioteca personal. Todo en un sitio.</strong></p>
 
-  ![Flutter](https://img.shields.io/badge/Flutter-3.x-02569B?logo=flutter)
-  ![Dart](https://img.shields.io/badge/Dart-3.x-0175C2?logo=dart)
-  ![License](https://img.shields.io/badge/License-MIT-green)
-  ![Platform](https://img.shields.io/badge/Platform-Android%20%7C%20iOS-lightgrey)
+# Myndex
+
+**Personal content library — movies, series, games, books, all in one place.**
+
+[![CI](https://github.com/KanjoLOOP/Myndex/actions/workflows/flutter_ci.yml/badge.svg)](https://github.com/KanjoLOOP/Myndex/actions/workflows/flutter_ci.yml)
+![Flutter](https://img.shields.io/badge/Flutter-3.x-02569B?logo=flutter&logoColor=white)
+![Dart](https://img.shields.io/badge/Dart-3.x-0175C2?logo=dart&logoColor=white)
+![License](https://img.shields.io/badge/License-MIT-green)
+![Platform](https://img.shields.io/badge/Platform-Android-3DDC84?logo=android&logoColor=white)
+
 </div>
 
 ---
 
-## ✨ El origen
+## Overview
 
-Myndex nació de una libreta.
+Myndex is an **offline-first** Android app for tracking personal content consumption: movies, series, video games, books, and anime. No accounts, no servers, no subscriptions — everything lives on your device.
 
-Mi pareja llevaba años apuntando a mano cada película que quería ver, cada libro que le recomendaban, cada serie que tenía pendiente. Páginas y páginas llenas de títulos, estados y valoraciones escritas a boli. La libreta se perdía, las notas se borraban, nunca sabía qué había visto ya y qué no.
-
-Esta app es la versión digital de esa libreta — pero sin límites, sin letra ilegible y con búsqueda instantánea.
+External APIs (TMDB, RAWG, Open Library) are used optionally to auto-fill covers, release years, and metadata when adding new titles.
 
 ---
 
-## 🎯 ¿Qué es Myndex?
+## Features
 
-Una app móvil **100% offline-first** para gestionar tu consumo de contenido personal: películas, series, videojuegos, libros, anime y más. Sin cuentas, sin servidores, sin suscripciones. Todo queda en tu dispositivo.
-
----
-
-## 🚀 Funcionalidades
-
-- **Añadir contenido** manualmente o buscando en TMDB / RAWG / Open Library
-- **Estados**: Pendiente · En progreso · Completado · Abandonado
-- **Puntuación** de 0 a 10
-- **Notas personales** por título
-- **Filtros** por tipo, estado y puntuación
-- **Export / Import JSON** para backup y migración entre dispositivos
-- **Offline-first**: funciona sin internet (la búsqueda de APIs es opcional)
-
----
-
-## 🏗️ Arquitectura
-
-```
-Clean Architecture + MVVM
-├── core/           # Utilidades, temas, base de datos, router
-└── features/
-    ├── content/    # CRUD principal
-    │   ├── data/       # Datasources (Drift + TMDB), models, repository impl
-    │   ├── domain/     # Entities, repository abstract, usecases
-    │   └── presentation/ # Pages, providers (Riverpod), widgets
-    ├── search/     # Búsqueda local y API
-    ├── home/       # Vista principal con filtros
-    └── settings/   # Export / Import
-```
-
-**Stack:**
-| Capa | Librería |
+| Feature | Description |
 |---|---|
-| Estado | Flutter Riverpod 2.x |
-| Base de datos local | Drift (SQLite) |
-| Navegación | go_router |
-| HTTP | Dio |
-| UI | Material 3 |
+| Add content | Manually or via API search (TMDB / RAWG / Open Library) |
+| Status tracking | Pending · In Progress · Completed · Dropped |
+| Smart Backlog | AI-ranked priority queue based on score + status |
+| Recommendations | Local engine suggests related titles from your library |
+| Timeline | Chronological view of completed content |
+| Vault | Organize titles into custom collections |
+| Stats | Charts and metrics on your library |
+| Ratings | 0–10 score with radar chart breakdown |
+| Progress tracking | Estimated time remaining per title |
+| Filters | By type, status, score, and more |
+| Backup | Export / import as JSON |
+| Offline-first | Works without internet; APIs are optional enrichment |
 
 ---
 
-## ⚙️ Instalación y ejecución
+## Architecture
 
-### Requisitos
+Clean Architecture + MVVM with feature-based module structure.
 
-- Flutter SDK ≥ 3.3.0
-- Dart SDK ≥ 3.3.0
-- Android SDK / Xcode (según plataforma objetivo)
+```
+lib/
+├── core/
+│   ├── database/        # Drift (SQLite) setup
+│   ├── network/         # Dio HTTP client factory
+│   ├── router/          # go_router configuration
+│   ├── security/        # API key manager, input sanitizer
+│   ├── theme/           # Material 3 theme, colors, text styles
+│   └── widgets/         # Shared UI components
+└── features/
+    ├── content/         # Core CRUD (data · domain · presentation)
+    ├── home/            # Library view with advanced filters
+    ├── search/          # Local + external search
+    ├── vault/           # Collections
+    ├── stats/           # Charts and library metrics
+    ├── timeline/        # Chronological activity view
+    ├── smart_backlog/   # Priority-ranked pending content
+    ├── backup/          # Export / import
+    └── settings/        # App preferences
+```
 
-### Pasos
+**Tech stack:**
+
+| Layer | Library |
+|---|---|
+| State management | Flutter Riverpod 2.x |
+| Local database | Drift (SQLite) |
+| Navigation | go_router |
+| HTTP | Dio |
+| Charts | fl_chart |
+| UI | Material 3 |
+| Code generation | Freezed + json_serializable + riverpod_generator |
+
+---
+
+## Getting Started
+
+### Prerequisites
+
+- Flutter SDK >= 3.3.0
+- Dart SDK >= 3.3.0
+- Android SDK (for device/emulator)
+
+### Setup
 
 ```bash
-# 1. Clona el repositorio
+# 1. Clone
 git clone https://github.com/KanjoLOOP/Myndex.git
 cd Myndex
 
-# 2. Instala dependencias
+# 2. Install dependencies
 flutter pub get
 
-# 3. Genera código (Drift + Riverpod + Freezed)
+# 3. Generate code (Drift + Riverpod + Freezed)
 dart run build_runner build --delete-conflicting-outputs
 
-# 4. (Opcional) Configura las API keys
-cp .env.example .env
-# Edita .env con tus claves de TMDB y RAWG
-
-# 5. Ejecuta
+# 4. Run (without API keys — local features only)
 flutter run
+
+# 5. Run with API keys (enables external search)
+flutter run \
+  --dart-define=TMDB_API_KEY=your_tmdb_key \
+  --dart-define=RAWG_API_KEY=your_rawg_key
 ```
 
-> Las API keys se inyectan en tiempo de compilación con `--dart-define`:
-> ```bash
-> flutter run --dart-define=TMDB_API_KEY=tu_clave --dart-define=RAWG_API_KEY=tu_clave
-> ```
+> API keys are injected at compile time via `--dart-define` and are never stored in source code. See `.env.example` for reference. Open Library requires no key.
+
+### Build release APK
+
+```bash
+flutter build apk --release \
+  --dart-define=TMDB_API_KEY=your_tmdb_key \
+  --dart-define=RAWG_API_KEY=your_rawg_key
+```
 
 ---
 
-## 🌿 Ramas
+## API Keys
 
-| Rama | Propósito |
+| API | Used for | Key required | Free tier |
+|---|---|---|---|
+| [TMDB](https://www.themoviedb.org/settings/api) | Movies & Series metadata | Yes | Yes |
+| [RAWG](https://rawg.io/apidocs) | Video game metadata | Yes | Yes (20k req/month) |
+| [Open Library](https://openlibrary.org/developers) | Book metadata | No | Always free |
+
+---
+
+## Security
+
+- API keys never appear in source code or git history
+- All network traffic is HTTPS-only (enforced at runtime)
+- User input is sanitized before database writes and API queries
+- No user data is sent to any external server beyond metadata lookups
+
+---
+
+## Roadmap
+
+- [x] TMDB integration (movies & series)
+- [x] RAWG integration (games)
+- [x] Open Library integration (books)
+- [x] Library stats and charts
+- [x] Smart Backlog with priority ranking
+- [x] Timeline view
+- [x] Custom collections (Vault)
+- [x] Recommendations engine
+- [ ] Home screen widget (Android)
+- [ ] Push notifications / reminders
+- [ ] Customizable accent color
+- [ ] Google Play Store release
+
+---
+
+## Branch Strategy
+
+| Branch | Purpose |
 |---|---|
-| `main` | Producción estable |
-| `develop` | Integración de features |
-| `feature/*` | Nuevas funcionalidades |
-| `fix/*` | Corrección de bugs |
-| `release/*` | Preparación de versiones |
+| `main` | Stable, production-ready |
+| `develop` | Integration of features |
+| `feature/*` | New features |
+| `fix/*` | Bug fixes |
+| `release/*` | Release preparation |
 
 ---
 
-## 🗺️ Roadmap
-
-- [ ] Integración con RAWG (videojuegos)
-- [ ] Integración con Open Library (libros)
-- [ ] Widget de pantalla de inicio (Android)
-- [ ] Estadísticas y gráficas de consumo
-- [ ] Tema personalizable (colores)
-- [ ] Recordatorios y notificaciones
-
----
-
-## 🔒 Proyecto privado
-
-Este es un proyecto personal, no está abierto a contribuciones externas.
-
----
-
-## 📄 Licencia
+## License
 
 MIT © [KanjoLOOP](https://github.com/KanjoLOOP)
